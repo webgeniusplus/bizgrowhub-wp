@@ -1,5 +1,5 @@
 <?php
-namespace InsightHub;
+namespace MarketPulse;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -18,70 +18,70 @@ class WooCommerce_Guard {
     private $api_client;
 
     /* ── Option keys ─────────────────────────────────────── */
-    const OPT_ENABLED        = 'insight_hub_wg_enabled';
-    const OPT_CHECK_PHONE    = 'insight_hub_wg_check_phone';
-    const OPT_CHECK_IP       = 'insight_hub_wg_check_ip';
-    const OPT_CHECK_EMAIL    = 'insight_hub_wg_check_email';
-    const OPT_TIME_HOURS     = 'insight_hub_wg_time_hours';
-    const OPT_ORDER_LIMIT    = 'insight_hub_wg_order_limit';
-    const OPT_ERROR_MESSAGE  = 'insight_hub_wg_error_message';
-    const OPT_BLOCKED_EMAILS = 'insight_hub_wg_blocked_emails';
-    const OPT_BLOCKED_IPS    = 'insight_hub_wg_blocked_ips';
-    const OPT_BLOCKED_PHONES = 'insight_hub_wg_blocked_phones';
+    const OPT_ENABLED        = 'marketpulse_wg_enabled';
+    const OPT_CHECK_PHONE    = 'marketpulse_wg_check_phone';
+    const OPT_CHECK_IP       = 'marketpulse_wg_check_ip';
+    const OPT_CHECK_EMAIL    = 'marketpulse_wg_check_email';
+    const OPT_TIME_HOURS     = 'marketpulse_wg_time_hours';
+    const OPT_ORDER_LIMIT    = 'marketpulse_wg_order_limit';
+    const OPT_ERROR_MESSAGE  = 'marketpulse_wg_error_message';
+    const OPT_BLOCKED_EMAILS = 'marketpulse_wg_blocked_emails';
+    const OPT_BLOCKED_IPS    = 'marketpulse_wg_blocked_ips';
+    const OPT_BLOCKED_PHONES = 'marketpulse_wg_blocked_phones';
 
     /* ── Popup customization ───────────────────────────── */
-    const OPT_POPUP_TITLE    = 'insight_hub_wg_popup_title';
-    const OPT_POPUP_BG       = 'insight_hub_wg_popup_bg_color';
-    const OPT_POPUP_TEXT     = 'insight_hub_wg_popup_text_color';
-    const OPT_POPUP_ACCENT   = 'insight_hub_wg_popup_accent_color';
-    const OPT_POPUP_BTN_RETRY = 'insight_hub_wg_popup_btn_retry';
-    const OPT_POPUP_BTN_CLOSE = 'insight_hub_wg_popup_btn_close';
+    const OPT_POPUP_TITLE    = 'marketpulse_wg_popup_title';
+    const OPT_POPUP_BG       = 'marketpulse_wg_popup_bg_color';
+    const OPT_POPUP_TEXT     = 'marketpulse_wg_popup_text_color';
+    const OPT_POPUP_ACCENT   = 'marketpulse_wg_popup_accent_color';
+    const OPT_POPUP_BTN_RETRY = 'marketpulse_wg_popup_btn_retry';
+    const OPT_POPUP_BTN_CLOSE = 'marketpulse_wg_popup_btn_close';
 
     /* ── Per-reason popup text ─────────────────────────── */
-    const OPT_RATE_LIMIT_TITLE   = 'insight_hub_wg_rate_limit_title';
-    const OPT_RATE_LIMIT_MESSAGE = 'insight_hub_wg_rate_limit_message';
-    const OPT_BLACKLIST_TITLE    = 'insight_hub_wg_blacklist_title';
-    const OPT_BLACKLIST_MESSAGE  = 'insight_hub_wg_blacklist_message';
-    const OPT_RL_SHOW_CANCEL    = 'insight_hub_wg_rl_show_cancel';
-    const OPT_RL_SHOW_RETRY     = 'insight_hub_wg_rl_show_retry';
-    const OPT_BL_SHOW_CANCEL    = 'insight_hub_wg_bl_show_cancel';
-    const OPT_BL_SHOW_RETRY     = 'insight_hub_wg_bl_show_retry';
-    const OPT_POPUP_BRAND    = 'insight_hub_wg_popup_brand_text';
-    const OPT_POPUP_HTML     = 'insight_hub_wg_popup_html';
+    const OPT_RATE_LIMIT_TITLE   = 'marketpulse_wg_rate_limit_title';
+    const OPT_RATE_LIMIT_MESSAGE = 'marketpulse_wg_rate_limit_message';
+    const OPT_BLACKLIST_TITLE    = 'marketpulse_wg_blacklist_title';
+    const OPT_BLACKLIST_MESSAGE  = 'marketpulse_wg_blacklist_message';
+    const OPT_RL_SHOW_CANCEL    = 'marketpulse_wg_rl_show_cancel';
+    const OPT_RL_SHOW_RETRY     = 'marketpulse_wg_rl_show_retry';
+    const OPT_BL_SHOW_CANCEL    = 'marketpulse_wg_bl_show_cancel';
+    const OPT_BL_SHOW_RETRY     = 'marketpulse_wg_bl_show_retry';
+    const OPT_POPUP_BRAND    = 'marketpulse_wg_popup_brand_text';
+    const OPT_POPUP_HTML     = 'marketpulse_wg_popup_html';
 
     public function __construct() {
-        error_log( 'INSIGHT_HUB WooGuard: Constructor called' );
+        error_log( 'MARKETPULSE WooGuard: Constructor called' );
 
         // Check if woo-guard addon is installed via dashboard
-        $installed = get_option( 'insight_hub_installed_addons', array() );
+        $installed = get_option( 'marketpulse_installed_addons', array() );
         if ( is_array( $installed ) && ! empty( $installed ) && ! in_array( 'woo-guard', $installed, true ) ) {
-            error_log( 'INSIGHT_HUB WooGuard: Addon not installed in dashboard, skipping' );
+            error_log( 'MARKETPULSE WooGuard: Addon not installed in dashboard, skipping' );
             return;
         }
 
         if ( ! class_exists( 'WooCommerce' ) ) {
-            error_log( 'INSIGHT_HUB WooGuard: WooCommerce NOT active, skipping' );
+            error_log( 'MARKETPULSE WooGuard: WooCommerce NOT active, skipping' );
             return;
         }
 
-        $feature_toggle = get_option( INSIGHT_HUB_OPTION_FEATURE_WC_GUARD, '1' );
-        error_log( 'INSIGHT_HUB WooGuard: Feature toggle = ' . var_export( $feature_toggle, true ) );
+        $feature_toggle = get_option( MARKETPULSE_OPTION_FEATURE_WC_GUARD, '1' );
+        error_log( 'MARKETPULSE WooGuard: Feature toggle = ' . var_export( $feature_toggle, true ) );
         if ( $feature_toggle !== '1' ) {
-            error_log( 'INSIGHT_HUB WooGuard: Feature disabled via toggle, skipping' );
+            error_log( 'MARKETPULSE WooGuard: Feature disabled via toggle, skipping' );
             return;
         }
 
         $this->api_client = new API_Client();
 
         $enabled = self::get_settings()['enabled'];
-        error_log( 'INSIGHT_HUB WooGuard: Settings enabled = ' . var_export( $enabled, true ) );
+        error_log( 'MARKETPULSE WooGuard: Settings enabled = ' . var_export( $enabled, true ) );
 
         // Always register REST routes
         add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
 
         // Always register checkout hook — check enabled inside the function (like reference plugin)
         add_action( 'woocommerce_checkout_process', [ $this, 'check_order_limits' ] );
-        error_log( 'INSIGHT_HUB WooGuard: Registered woocommerce_checkout_process hook' );
+        error_log( 'MARKETPULSE WooGuard: Registered woocommerce_checkout_process hook' );
 
         // AJAX pre-validation for popup
         add_action( 'wp_ajax_woo_guard_validate', [ $this, 'ajax_validate_order' ] );
@@ -93,7 +93,7 @@ class WooCommerce_Guard {
         // Report new orders to dashboard
         add_action( 'woocommerce_new_order', [ $this, 'report_order' ] );
 
-        error_log( 'INSIGHT_HUB WooGuard: All hooks registered successfully' );
+        error_log( 'MARKETPULSE WooGuard: All hooks registered successfully' );
     }
 
     /* ================================================================
@@ -174,13 +174,13 @@ class WooCommerce_Guard {
      * Main checkout validation — mirrors smartflow_bd_check_repeat_orders() exactly.
      */
     public function check_order_limits() {
-        error_log( 'INSIGHT_HUB WooGuard: checkout_process hook triggered' );
+        error_log( 'MARKETPULSE WooGuard: checkout_process hook triggered' );
 
         $settings = self::get_settings();
-        error_log( 'INSIGHT_HUB WooGuard: Settings = ' . print_r( $settings, true ) );
+        error_log( 'MARKETPULSE WooGuard: Settings = ' . print_r( $settings, true ) );
 
         if ( ! $settings['enabled'] ) {
-            error_log( 'INSIGHT_HUB WooGuard: Feature disabled, skipping' );
+            error_log( 'MARKETPULSE WooGuard: Feature disabled, skipping' );
             return;
         }
 
@@ -188,7 +188,7 @@ class WooCommerce_Guard {
         $email = isset( $_POST['billing_email'] ) ? sanitize_email( $_POST['billing_email'] ) : '';
         $ip    = \WC_Geolocation::get_ip_address();
 
-        error_log( "INSIGHT_HUB WooGuard: phone=$phone, email=$email, ip=$ip" );
+        error_log( "MARKETPULSE WooGuard: phone=$phone, email=$email, ip=$ip" );
 
         $rl_msg = $settings['rate_limit_message'];
         $bl_msg = $settings['blacklist_message'];
@@ -200,7 +200,7 @@ class WooCommerce_Guard {
         // 1. Order limit checks (first)
         if ( $settings['check_phone'] && ! empty( $phone ) ) {
             if ( $this->check_order_limit( 'billing_phone', $phone, $time_hours, $order_limit ) ) {
-                error_log( 'INSIGHT_HUB WooGuard: Blocking — phone limit exceeded' );
+                error_log( 'MARKETPULSE WooGuard: Blocking — phone limit exceeded' );
                 $this->report_block_to_api( 'rate_limit', 'phone', $email, $phone, $ip );
                 wc_add_notice( $rl_msg, 'error' );
                 return;
@@ -208,7 +208,7 @@ class WooCommerce_Guard {
         }
         if ( $settings['check_email'] && ! empty( $email ) ) {
             if ( $this->check_order_limit( 'billing_email', $email, $time_hours, $order_limit ) ) {
-                error_log( 'INSIGHT_HUB WooGuard: Blocking — email limit exceeded' );
+                error_log( 'MARKETPULSE WooGuard: Blocking — email limit exceeded' );
                 $this->report_block_to_api( 'rate_limit', 'email', $email, $phone, $ip );
                 wc_add_notice( $rl_msg, 'error' );
                 return;
@@ -216,7 +216,7 @@ class WooCommerce_Guard {
         }
         if ( $settings['check_ip'] && ! empty( $ip ) ) {
             if ( $this->check_order_limit( 'customer_ip_address', $ip, $time_hours, $order_limit ) ) {
-                error_log( 'INSIGHT_HUB WooGuard: Blocking — IP limit exceeded' );
+                error_log( 'MARKETPULSE WooGuard: Blocking — IP limit exceeded' );
                 $this->report_block_to_api( 'rate_limit', 'ip', $email, $phone, $ip );
                 wc_add_notice( $rl_msg, 'error' );
                 return;
@@ -229,25 +229,25 @@ class WooCommerce_Guard {
         $blocked_phones = (array) $settings['blocked_phones'];
 
         if ( $email && in_array( strtolower( $email ), array_map( 'strtolower', $blocked_emails ), true ) ) {
-            error_log( 'INSIGHT_HUB WooGuard: Blocked — email in blacklist' );
+            error_log( 'MARKETPULSE WooGuard: Blocked — email in blacklist' );
             $this->report_block_to_api( 'blacklist', 'email', $email, $phone, $ip );
             wc_add_notice( $bl_msg, 'error' );
             return;
         }
         if ( $ip && in_array( $ip, $blocked_ips, true ) ) {
-            error_log( 'INSIGHT_HUB WooGuard: Blocked — IP in blacklist' );
+            error_log( 'MARKETPULSE WooGuard: Blocked — IP in blacklist' );
             $this->report_block_to_api( 'blacklist', 'ip', $email, $phone, $ip );
             wc_add_notice( $bl_msg, 'error' );
             return;
         }
         if ( $phone && in_array( $phone, $blocked_phones, true ) ) {
-            error_log( 'INSIGHT_HUB WooGuard: Blocked — phone in blacklist' );
+            error_log( 'MARKETPULSE WooGuard: Blocked — phone in blacklist' );
             $this->report_block_to_api( 'blacklist', 'phone', $email, $phone, $ip );
             wc_add_notice( $bl_msg, 'error' );
             return;
         }
 
-        error_log( 'INSIGHT_HUB WooGuard: All checks passed, allowing order' );
+        error_log( 'MARKETPULSE WooGuard: All checks passed, allowing order' );
     }
 
     /**
@@ -255,7 +255,7 @@ class WooCommerce_Guard {
      */
     private function check_order_limit( $field_type, $field_value, $time_hours, $order_limit ) {
         error_log( sprintf(
-            'INSIGHT_HUB WooGuard: check_order_limit %s=%s, hours=%d, limit=%d',
+            'MARKETPULSE WooGuard: check_order_limit %s=%s, hours=%d, limit=%d',
             $field_type, $field_value, $time_hours, $order_limit
         ) );
 
@@ -264,7 +264,7 @@ class WooCommerce_Guard {
 
         $time_from = time() - ( $time_hours * 3600 );
 
-        error_log( 'INSIGHT_HUB WooGuard: Time from = ' . gmdate( 'Y-m-d H:i:s', $time_from ) );
+        error_log( 'MARKETPULSE WooGuard: Time from = ' . gmdate( 'Y-m-d H:i:s', $time_from ) );
 
         $args = [
             'date_created' => '>=' . $time_from,
@@ -274,13 +274,13 @@ class WooCommerce_Guard {
             'paginate'     => true,
         ];
 
-        error_log( 'INSIGHT_HUB WooGuard: Query args = ' . print_r( $args, true ) );
+        error_log( 'MARKETPULSE WooGuard: Query args = ' . print_r( $args, true ) );
 
         $orders = wc_get_orders( $args );
-        error_log( 'INSIGHT_HUB WooGuard: Found ' . $orders->total . ' orders' );
+        error_log( 'MARKETPULSE WooGuard: Found ' . $orders->total . ' orders' );
 
         $should_block = $orders->total >= $order_limit;
-        error_log( 'INSIGHT_HUB WooGuard: Block? ' . ( $should_block ? 'YES' : 'NO' ) . " (total={$orders->total}, limit=$order_limit)" );
+        error_log( 'MARKETPULSE WooGuard: Block? ' . ( $should_block ? 'YES' : 'NO' ) . " (total={$orders->total}, limit=$order_limit)" );
 
         return $should_block;
     }
@@ -383,18 +383,18 @@ class WooCommerce_Guard {
             return;
         }
 
-        $ver = INSIGHT_HUB_VERSION . '.' . time(); // Cache bust during dev
+        $ver = MARKETPULSE_VERSION . '.' . time(); // Cache bust during dev
 
         wp_enqueue_style(
             'woo-guard-popup',
-            INSIGHT_HUB_PLUGIN_URL . 'assets/css/woo-guard-popup.css',
+            MARKETPULSE_PLUGIN_URL . 'assets/css/woo-guard-popup.css',
             [],
             $ver
         );
 
         wp_enqueue_script(
             'woo-guard-popup',
-            INSIGHT_HUB_PLUGIN_URL . 'assets/js/woo-guard-popup.js',
+            MARKETPULSE_PLUGIN_URL . 'assets/js/woo-guard-popup.js',
             [ 'jquery' ],
             $ver,
             true
@@ -449,9 +449,9 @@ class WooCommerce_Guard {
         }
 
         if ( $license_key ) {
-            $stored_key = get_option( INSIGHT_HUB_OPTION_LICENSE_KEY, '' );
+            $stored_key = get_option( MARKETPULSE_OPTION_LICENSE_KEY, '' );
             if ( ! empty( $stored_key ) && $license_key === $stored_key ) {
-                $status = get_option( INSIGHT_HUB_OPTION_LICENSE_STATUS, 'inactive' );
+                $status = get_option( MARKETPULSE_OPTION_LICENSE_STATUS, 'inactive' );
                 if ( $status === 'active' ) {
                     return true;
                 }
@@ -467,7 +467,7 @@ class WooCommerce_Guard {
 
         if ( $key_hash ) {
             // Verify: hash the stored license key and compare
-            $stored_key = get_option( INSIGHT_HUB_OPTION_LICENSE_KEY, '' );
+            $stored_key = get_option( MARKETPULSE_OPTION_LICENSE_KEY, '' );
             if ( ! empty( $stored_key ) ) {
                 $stored_hash = hash( 'sha256', $stored_key );
                 if ( hash_equals( $stored_hash, $key_hash ) ) {
@@ -490,7 +490,7 @@ class WooCommerce_Guard {
             return new \WP_Error( 'invalid_data', 'Settings data required', [ 'status' => 400 ] );
         }
         self::save_settings( $settings );
-        error_log( 'INSIGHT_HUB WooGuard: Settings saved via REST API: ' . print_r( self::get_settings(), true ) );
+        error_log( 'MARKETPULSE WooGuard: Settings saved via REST API: ' . print_r( self::get_settings(), true ) );
         return new \WP_REST_Response( [ 'success' => true, 'data' => [ 'settings' => self::get_settings() ] ] );
     }
 
@@ -503,7 +503,7 @@ class WooCommerce_Guard {
             return;
         }
 
-        $this->api_client->make_request( INSIGHT_HUB_ENDPOINT_WOO_GUARD_REPORT, [
+        $this->api_client->make_request( MARKETPULSE_ENDPOINT_WOO_GUARD_REPORT, [
             'report_type' => $reason_type === 'duplicate' ? 'duplicate_attempt' : 'blocked_attempt',
             'email'       => $email,
             'phone'       => $phone,
@@ -520,7 +520,7 @@ class WooCommerce_Guard {
         $order = wc_get_order( $order_id );
         if ( ! $order ) return;
 
-        $this->api_client->make_request( INSIGHT_HUB_ENDPOINT_WOO_GUARD_REPORT, [
+        $this->api_client->make_request( MARKETPULSE_ENDPOINT_WOO_GUARD_REPORT, [
             'order_id'    => $order_id,
             'order_total' => $order->get_total(),
             'currency'    => $order->get_currency(),
@@ -578,7 +578,7 @@ class WooCommerce_Guard {
 }
 
 /* Hook: Sync remote_config → WP options on heartbeat */
-add_action( 'update_option_insight_hub_remote_config', function( $old, $new ) {
+add_action( 'update_option_marketpulse_remote_config', function( $old, $new ) {
     if ( isset( $new['woo_guard'] ) ) {
         WooCommerce_Guard::sync_from_remote_config( $new['woo_guard'] );
     }

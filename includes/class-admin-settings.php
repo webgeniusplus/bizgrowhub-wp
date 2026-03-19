@@ -2,10 +2,10 @@
 /**
  * Admin Settings for Insight Hub
  *
- * @package InsightHub
+ * @package MarketPulse
  */
 
-namespace InsightHub;
+namespace MarketPulse;
 
 // Prevent direct access
 if ( ! defined( 'ABSPATH' ) ) {
@@ -30,14 +30,14 @@ class Admin_Settings {
     public function __construct() {
         $this->license_manager = new License_Manager();
         add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
-        add_action( 'admin_post_insight_hub_settings', array( $this, 'handle_form' ) );
+        add_action( 'admin_post_marketpulse_settings', array( $this, 'handle_form' ) );
         // Feature toggles & GA4 now managed from dashboard — no local form handlers needed
         add_action( 'rest_api_init', array( $this, 'register_settings_rest_routes' ) );
         
         // AJAX handlers
-        add_action( 'wp_ajax_insight_hub_validate_license', array( $this, 'ajax_validate_license' ) );
-        add_action( 'wp_ajax_insight_hub_activate_license', array( $this, 'ajax_activate_license' ) );
-        add_action( 'wp_ajax_insight_hub_deactivate_license', array( $this, 'ajax_deactivate_license' ) );
+        add_action( 'wp_ajax_marketpulse_validate_license', array( $this, 'ajax_validate_license' ) );
+        add_action( 'wp_ajax_marketpulse_activate_license', array( $this, 'ajax_activate_license' ) );
+        add_action( 'wp_ajax_marketpulse_deactivate_license', array( $this, 'ajax_deactivate_license' ) );
         
         // Enqueue scripts
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
@@ -50,8 +50,8 @@ class Admin_Settings {
         add_menu_page(
             'MarketPulse',
             'MarketPulse',
-            INSIGHT_HUB_CAPABILITY_MANAGE,
-            'insight-hub',
+            MARKETPULSE_CAPABILITY_MANAGE,
+            'marketpulse',
             array( $this, 'settings_page' ),
             'dashicons-chart-area',
             30
@@ -62,11 +62,11 @@ class Admin_Settings {
      * Settings page
      */
     public function settings_page() {
-        if ( ! current_user_can( INSIGHT_HUB_CAPABILITY_MANAGE ) ) {
+        if ( ! current_user_can( MARKETPULSE_CAPABILITY_MANAGE ) ) {
             wp_die( 'You do not have sufficient permissions to access this page.' );
         }
 
-        $license_key = get_option( INSIGHT_HUB_OPTION_LICENSE_KEY, '' );
+        $license_key = get_option( MARKETPULSE_OPTION_LICENSE_KEY, '' );
         $status = $this->license_manager->get_license_status();
         $last_heartbeat = $this->license_manager->get_last_heartbeat();
         $is_active = ( $status === 'active' );
@@ -137,7 +137,7 @@ class Admin_Settings {
                         <span class="mp-info-value"><code><?php echo esc_html( get_site_url() ); ?></code></span>
 
                         <span class="mp-info-label">Plugin Version</span>
-                        <span class="mp-info-value"><code><?php echo esc_html( INSIGHT_HUB_VERSION ); ?></code></span>
+                        <span class="mp-info-value"><code><?php echo esc_html( MARKETPULSE_VERSION ); ?></code></span>
 
                         <span class="mp-info-label">WordPress</span>
                         <span class="mp-info-value"><code><?php echo esc_html( get_bloginfo( 'version' ) ); ?></code></span>
@@ -156,9 +156,9 @@ class Admin_Settings {
                     <div class="mp-card-header">&#x1f517; Activation Details</div>
                     <div class="mp-info-grid">
                         <?php
-                            $project_name  = get_option( 'insight_hub_project_name', '' );
-                            $project_id    = get_option( 'insight_hub_project_id', '' );
-                            $activation_id = get_option( 'insight_hub_activation_id', '' );
+                            $project_name  = get_option( 'marketpulse_project_name', '' );
+                            $project_id    = get_option( 'marketpulse_project_id', '' );
+                            $activation_id = get_option( 'marketpulse_activation_id', '' );
                         ?>
                         <?php if ( $project_name ) : ?>
                             <span class="mp-info-label">Site Name</span>
@@ -243,7 +243,7 @@ class Admin_Settings {
     public function check_license_auth( $request ) {
         if ( current_user_can( 'manage_options' ) ) return true;
 
-        $stored_key = get_option( INSIGHT_HUB_OPTION_LICENSE_KEY, '' );
+        $stored_key = get_option( MARKETPULSE_OPTION_LICENSE_KEY, '' );
 
         // License key auth (raw key)
         $license_key = $request->get_header( 'X-License-Key' );
@@ -252,7 +252,7 @@ class Admin_Settings {
             $license_key = $params['license_key'] ?? null;
         }
         if ( $license_key && ! empty( $stored_key ) && $license_key === $stored_key ) {
-            $status = get_option( INSIGHT_HUB_OPTION_LICENSE_STATUS, 'inactive' );
+            $status = get_option( MARKETPULSE_OPTION_LICENSE_STATUS, 'inactive' );
             if ( $status === 'active' ) return true;
         }
 
@@ -275,12 +275,12 @@ class Admin_Settings {
      */
     public function rest_get_features() {
         return new \WP_REST_Response( [ 'success' => true, 'data' => [
-            'event_tracking' => get_option( INSIGHT_HUB_OPTION_FEATURE_EVENT_TRACKING, '1' ) === '1',
-            'activity_logs'  => get_option( INSIGHT_HUB_OPTION_FEATURE_ACTIVITY_LOGS, '1' ) === '1',
-            'site_health'    => get_option( INSIGHT_HUB_OPTION_FEATURE_SITE_HEALTH, '1' ) === '1',
-            'wc_guard'       => get_option( INSIGHT_HUB_OPTION_FEATURE_WC_GUARD, '1' ) === '1',
-            'image_opt'      => get_option( INSIGHT_HUB_OPTION_FEATURE_IMAGE_OPT, '1' ) === '1',
-            'remote_actions' => get_option( INSIGHT_HUB_OPTION_FEATURE_REMOTE_ACTIONS, '1' ) === '1',
+            'event_tracking' => get_option( MARKETPULSE_OPTION_FEATURE_EVENT_TRACKING, '1' ) === '1',
+            'activity_logs'  => get_option( MARKETPULSE_OPTION_FEATURE_ACTIVITY_LOGS, '1' ) === '1',
+            'site_health'    => get_option( MARKETPULSE_OPTION_FEATURE_SITE_HEALTH, '1' ) === '1',
+            'wc_guard'       => get_option( MARKETPULSE_OPTION_FEATURE_WC_GUARD, '1' ) === '1',
+            'image_opt'      => get_option( MARKETPULSE_OPTION_FEATURE_IMAGE_OPT, '1' ) === '1',
+            'remote_actions' => get_option( MARKETPULSE_OPTION_FEATURE_REMOTE_ACTIONS, '1' ) === '1',
         ] ] );
     }
 
@@ -292,12 +292,12 @@ class Admin_Settings {
         $features = $params['features'] ?? $params;
 
         $map = [
-            'event_tracking' => INSIGHT_HUB_OPTION_FEATURE_EVENT_TRACKING,
-            'activity_logs'  => INSIGHT_HUB_OPTION_FEATURE_ACTIVITY_LOGS,
-            'site_health'    => INSIGHT_HUB_OPTION_FEATURE_SITE_HEALTH,
-            'wc_guard'       => INSIGHT_HUB_OPTION_FEATURE_WC_GUARD,
-            'image_opt'      => INSIGHT_HUB_OPTION_FEATURE_IMAGE_OPT,
-            'remote_actions' => INSIGHT_HUB_OPTION_FEATURE_REMOTE_ACTIONS,
+            'event_tracking' => MARKETPULSE_OPTION_FEATURE_EVENT_TRACKING,
+            'activity_logs'  => MARKETPULSE_OPTION_FEATURE_ACTIVITY_LOGS,
+            'site_health'    => MARKETPULSE_OPTION_FEATURE_SITE_HEALTH,
+            'wc_guard'       => MARKETPULSE_OPTION_FEATURE_WC_GUARD,
+            'image_opt'      => MARKETPULSE_OPTION_FEATURE_IMAGE_OPT,
+            'remote_actions' => MARKETPULSE_OPTION_FEATURE_REMOTE_ACTIONS,
         ];
 
         foreach ( $map as $key => $option ) {
@@ -306,7 +306,7 @@ class Admin_Settings {
             }
         }
 
-        error_log( 'INSIGHT_HUB: Feature toggles updated via REST API: ' . print_r( $features, true ) );
+        error_log( 'MARKETPULSE: Feature toggles updated via REST API: ' . print_r( $features, true ) );
         return $this->rest_get_features();
     }
 
@@ -315,8 +315,8 @@ class Admin_Settings {
      */
     public function rest_get_ga4() {
         return new \WP_REST_Response( [ 'success' => true, 'data' => [
-            'measurement_id' => get_option( INSIGHT_HUB_OPTION_GA4_MEASUREMENT_ID, '' ),
-            'property_id'    => get_option( INSIGHT_HUB_OPTION_GA4_PROPERTY_ID, '' ),
+            'measurement_id' => get_option( MARKETPULSE_OPTION_GA4_MEASUREMENT_ID, '' ),
+            'property_id'    => get_option( MARKETPULSE_OPTION_GA4_PROPERTY_ID, '' ),
         ] ] );
     }
 
@@ -327,13 +327,13 @@ class Admin_Settings {
         $params = $request->get_json_params();
 
         if ( isset( $params['measurement_id'] ) ) {
-            update_option( INSIGHT_HUB_OPTION_GA4_MEASUREMENT_ID, sanitize_text_field( $params['measurement_id'] ) );
+            update_option( MARKETPULSE_OPTION_GA4_MEASUREMENT_ID, sanitize_text_field( $params['measurement_id'] ) );
         }
         if ( isset( $params['property_id'] ) ) {
-            update_option( INSIGHT_HUB_OPTION_GA4_PROPERTY_ID, sanitize_text_field( $params['property_id'] ) );
+            update_option( MARKETPULSE_OPTION_GA4_PROPERTY_ID, sanitize_text_field( $params['property_id'] ) );
         }
 
-        error_log( 'INSIGHT_HUB: GA4 settings updated via REST API' );
+        error_log( 'MARKETPULSE: GA4 settings updated via REST API' );
         return $this->rest_get_ga4();
     }
 
@@ -341,12 +341,12 @@ class Admin_Settings {
      * Handle form submission
      */
     public function handle_form() {
-        if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['_wpnonce'] ), 'insight_hub_settings' ) ) {
-            wp_die( __( 'Security check failed.', 'insight-hub' ) );
+        if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['_wpnonce'] ), 'marketpulse_settings' ) ) {
+            wp_die( __( 'Security check failed.', 'marketpulse' ) );
         }
 
-        if ( ! current_user_can( INSIGHT_HUB_CAPABILITY_MANAGE ) ) {
-            wp_die( __( 'You do not have permission to do this.', 'insight-hub' ) );
+        if ( ! current_user_can( MARKETPULSE_CAPABILITY_MANAGE ) ) {
+            wp_die( __( 'You do not have permission to do this.', 'marketpulse' ) );
         }
 
         if ( isset( $_POST['activate'] ) ) {
@@ -407,34 +407,34 @@ class Admin_Settings {
 
         wp_enqueue_style(
             'MarketPulse-admin',
-            INSIGHT_HUB_PLUGIN_URL . 'assets/css/admin.css',
+            MARKETPULSE_PLUGIN_URL . 'assets/css/admin.css',
             array(),
-            INSIGHT_HUB_VERSION
+            MARKETPULSE_VERSION
         );
 
         wp_enqueue_script(
-            'insight-hub-admin',
-            INSIGHT_HUB_PLUGIN_URL . 'assets/js/admin.js',
+            'marketpulse-admin',
+            MARKETPULSE_PLUGIN_URL . 'assets/js/admin.js',
             array( 'jquery' ),
-            INSIGHT_HUB_VERSION,
+            MARKETPULSE_VERSION,
             true
         );
 
-        wp_localize_script( 'insight-hub-admin', 'insightHubAjax', array(
+        wp_localize_script( 'marketpulse-admin', 'marketPulseAjax', array(
             'ajax_url'       => admin_url( 'admin-ajax.php' ),
-            'nonce'          => wp_create_nonce( 'insight_hub_ajax' ),
+            'nonce'          => wp_create_nonce( 'marketpulse_ajax' ),
             'site_url'       => get_site_url(),
             'domain'         => wp_parse_url( get_site_url(), PHP_URL_HOST ),
-            'plugin_version' => INSIGHT_HUB_VERSION,
+            'plugin_version' => MARKETPULSE_VERSION,
             'wp_version'     => get_bloginfo( 'version' ),
             'php_version'    => phpversion(),
             'strings'        => array(
-                'checking'     => __( 'Checking...', 'insight-hub' ),
-                'activating'   => __( 'Activating...', 'insight-hub' ),
-                'deactivating' => __( 'Deactivating...', 'insight-hub' ),
-                'activate'     => __( 'Activate License', 'insight-hub' ),
-                'deactivate'   => __( 'Deactivate License', 'insight-hub' ),
-                'check'        => __( 'Check License', 'insight-hub' ),
+                'checking'     => __( 'Checking...', 'marketpulse' ),
+                'activating'   => __( 'Activating...', 'marketpulse' ),
+                'deactivating' => __( 'Deactivating...', 'marketpulse' ),
+                'activate'     => __( 'Activate License', 'marketpulse' ),
+                'deactivate'   => __( 'Deactivate License', 'marketpulse' ),
+                'check'        => __( 'Check License', 'marketpulse' ),
             ),
         ) );
     }
@@ -443,16 +443,16 @@ class Admin_Settings {
      * AJAX handler for license validation
      */
     public function ajax_validate_license() {
-        check_ajax_referer( 'insight_hub_ajax', 'nonce' );
+        check_ajax_referer( 'marketpulse_ajax', 'nonce' );
 
-        if ( ! current_user_can( INSIGHT_HUB_CAPABILITY_MANAGE ) ) {
-            wp_send_json_error( array( 'message' => __( 'Permission denied.', 'insight-hub' ) ) );
+        if ( ! current_user_can( MARKETPULSE_CAPABILITY_MANAGE ) ) {
+            wp_send_json_error( array( 'message' => __( 'Permission denied.', 'marketpulse' ) ) );
         }
 
         $license_key = isset( $_POST['license_key'] ) ? sanitize_text_field( wp_unslash( $_POST['license_key'] ) ) : '';
 
         if ( empty( $license_key ) ) {
-            wp_send_json_error( array( 'message' => __( 'License key is required.', 'insight-hub' ) ) );
+            wp_send_json_error( array( 'message' => __( 'License key is required.', 'marketpulse' ) ) );
         }
 
         $license_manager = new License_Manager();
@@ -464,7 +464,7 @@ class Admin_Settings {
         }
 
         wp_send_json_success( array(
-            'message' => __( 'License is valid.', 'insight-hub' ),
+            'message' => __( 'License is valid.', 'marketpulse' ),
             'data'    => $result,
         ) );
     }
@@ -473,16 +473,16 @@ class Admin_Settings {
      * AJAX handler for license activation
      */
     public function ajax_activate_license() {
-        check_ajax_referer( 'insight_hub_ajax', 'nonce' );
+        check_ajax_referer( 'marketpulse_ajax', 'nonce' );
 
-        if ( ! current_user_can( INSIGHT_HUB_CAPABILITY_MANAGE ) ) {
-            wp_send_json_error( array( 'message' => __( 'Permission denied.', 'insight-hub' ) ) );
+        if ( ! current_user_can( MARKETPULSE_CAPABILITY_MANAGE ) ) {
+            wp_send_json_error( array( 'message' => __( 'Permission denied.', 'marketpulse' ) ) );
         }
 
         $license_key = isset( $_POST['license_key'] ) ? sanitize_text_field( wp_unslash( $_POST['license_key'] ) ) : '';
 
         if ( empty( $license_key ) ) {
-            wp_send_json_error( array( 'message' => __( 'License key is required.', 'insight-hub' ) ) );
+            wp_send_json_error( array( 'message' => __( 'License key is required.', 'marketpulse' ) ) );
         }
 
         $license_manager = new License_Manager();
@@ -499,7 +499,7 @@ class Admin_Settings {
         }
 
         wp_send_json_success( array(
-            'message' => __( 'License activated successfully.', 'insight-hub' ),
+            'message' => __( 'License activated successfully.', 'marketpulse' ),
             'data'    => $result,
         ) );
     }
@@ -508,10 +508,10 @@ class Admin_Settings {
      * AJAX handler for license deactivation
      */
     public function ajax_deactivate_license() {
-        check_ajax_referer( 'insight_hub_ajax', 'nonce' );
+        check_ajax_referer( 'marketpulse_ajax', 'nonce' );
 
-        if ( ! current_user_can( INSIGHT_HUB_CAPABILITY_MANAGE ) ) {
-            wp_send_json_error( array( 'message' => __( 'Permission denied.', 'insight-hub' ) ) );
+        if ( ! current_user_can( MARKETPULSE_CAPABILITY_MANAGE ) ) {
+            wp_send_json_error( array( 'message' => __( 'Permission denied.', 'marketpulse' ) ) );
         }
 
         $license_manager = new License_Manager();
@@ -523,7 +523,7 @@ class Admin_Settings {
         }
 
         wp_send_json_success( array(
-            'message' => __( 'License deactivated successfully.', 'insight-hub' ),
+            'message' => __( 'License deactivated successfully.', 'marketpulse' ),
             'data'    => $result,
         ) );
     }

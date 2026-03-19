@@ -1,5 +1,5 @@
 <?php
-namespace InsightHub;
+namespace MarketPulse;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -22,7 +22,7 @@ class GA4_Tracker {
             return;
         }
 
-        $this->measurement_id = get_option( INSIGHT_HUB_OPTION_GA4_MEASUREMENT_ID, '' );
+        $this->measurement_id = get_option( MARKETPULSE_OPTION_GA4_MEASUREMENT_ID, '' );
 
         if ( empty( $this->measurement_id ) ) {
             return;
@@ -30,7 +30,7 @@ class GA4_Tracker {
 
         // Validate format (G-XXXXXXXXXX)
         if ( ! preg_match( '/^G-[A-Z0-9]+$/i', $this->measurement_id ) ) {
-            error_log( 'INSIGHT_HUB GA4: Invalid measurement ID format: ' . $this->measurement_id );
+            error_log( 'MARKETPULSE GA4: Invalid measurement ID format: ' . $this->measurement_id );
             return;
         }
 

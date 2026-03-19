@@ -1,5 +1,5 @@
 <?php
-namespace InsightHub;
+namespace MarketPulse;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -11,11 +11,11 @@ class Site_Health_Collector {
 
     public function __construct() {
         $this->api_client = new API_Client();
-        add_action( INSIGHT_HUB_CRON_HEARTBEAT, array( $this, 'sync_site_health' ) );
+        add_action( MARKETPULSE_CRON_HEARTBEAT, array( $this, 'sync_site_health' ) );
     }
 
     public function sync_site_health() {
-        if ( get_option( INSIGHT_HUB_OPTION_FEATURE_SITE_HEALTH, '1' ) !== '1' ) {
+        if ( get_option( MARKETPULSE_OPTION_FEATURE_SITE_HEALTH, '1' ) !== '1' ) {
             return;
         }
 
@@ -25,7 +25,7 @@ class Site_Health_Collector {
 
         $health_data = $this->collect_site_health();
 
-        $this->api_client->make_request( INSIGHT_HUB_ENDPOINT_SITE_HEALTH_SYNC, array(
+        $this->api_client->make_request( MARKETPULSE_ENDPOINT_SITE_HEALTH_SYNC, array(
             'health' => $health_data,
         ) );
     }

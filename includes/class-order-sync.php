@@ -1,5 +1,5 @@
 <?php
-namespace InsightHub;
+namespace MarketPulse;
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
@@ -41,7 +41,7 @@ class Order_Sync {
         if ( isset( $syncing[ $order_id ] ) ) return;
         $syncing[ $order_id ] = true;
 
-        $license_key = get_option( INSIGHT_HUB_OPTION_LICENSE_KEY );
+        $license_key = get_option( MARKETPULSE_OPTION_LICENSE_KEY );
         if ( empty( $license_key ) ) {
             unset( $syncing[ $order_id ] );
             return;

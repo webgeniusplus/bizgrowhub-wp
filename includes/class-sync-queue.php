@@ -83,14 +83,14 @@ class MarketPulse_Sync_Queue {
         if ( empty( $queue ) ) return;
 
         // Use plugin constants for API URL and credentials
-        $api_base    = defined( 'INSIGHT_HUB_API_BASE_URL' ) ? INSIGHT_HUB_API_BASE_URL : '';
-        $license_key = get_option( INSIGHT_HUB_OPTION_LICENSE_KEY, '' );
+        $api_base    = defined( 'MARKETPULSE_API_BASE_URL' ) ? MARKETPULSE_API_BASE_URL : '';
+        $license_key = get_option( MARKETPULSE_OPTION_LICENSE_KEY, '' );
         $domain      = parse_url( get_site_url(), PHP_URL_HOST );
 
         if ( empty( $api_base ) || empty( $license_key ) ) return;
 
         // Build full orders webhook endpoint
-        $endpoint = trailingslashit( $api_base ) . ltrim( INSIGHT_HUB_ENDPOINT_ORDER_WEBHOOK, '/' );
+        $endpoint = trailingslashit( $api_base ) . ltrim( MARKETPULSE_ENDPOINT_ORDER_WEBHOOK, '/' );
 
         $updated_queue = [];
         $batch_orders  = [];
@@ -104,7 +104,7 @@ class MarketPulse_Sync_Queue {
             $order = wc_get_order( $item['order_id'] );
             if ( ! $order || ! ( $order instanceof WC_Order ) ) continue;
 
-            $batch_orders[]  = \InsightHub\Order_Sync::format_order( $order );
+            $batch_orders[]  = \MarketPulse\Order_Sync::format_order( $order );
             $batch_indices[] = $i;
         }
 

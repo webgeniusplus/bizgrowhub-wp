@@ -2,11 +2,11 @@
 /**
  * SEO Security Collector for Insight Hub
  *
- * @package InsightHub
+ * @package MarketPulse
  * @todo Implement SEO/security scan collection
  */
 
-namespace InsightHub;
+namespace MarketPulse;
 
 // Prevent direct access
 if ( ! defined( 'ABSPATH' ) ) {
@@ -31,7 +31,7 @@ class SEO_Security_Collector {
      */
     public function __construct() {
         $this->api_client = new API_Client();
-        add_action( INSIGHT_HUB_CRON_HEARTBEAT, array( $this, 'collect_and_send_signals' ) );
+        add_action( MARKETPULSE_CRON_HEARTBEAT, array( $this, 'collect_and_send_signals' ) );
     }
 
     /**
@@ -39,7 +39,7 @@ class SEO_Security_Collector {
      */
     public function collect_and_send_signals() {
         $signals = $this->collect_signals();
-        $this->api_client->make_request( INSIGHT_HUB_ENDPOINT_SEO_SECURITY, $signals );
+        $this->api_client->make_request( MARKETPULSE_ENDPOINT_SEO_SECURITY, $signals );
     }
 
     /**

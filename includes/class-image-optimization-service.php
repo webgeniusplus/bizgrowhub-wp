@@ -2,11 +2,11 @@
 /**
  * Image Optimization Service for Insight Hub
  *
- * @package InsightHub
+ * @package MarketPulse
  * @todo Implement image optimization functionality
  */
 
-namespace InsightHub;
+namespace MarketPulse;
 
 // Prevent direct access
 if ( ! defined( 'ABSPATH' ) ) {
@@ -47,7 +47,7 @@ class Image_Optimization_Service {
      */
     private function register_hooks() {
         add_filter( 'wp_handle_upload', array( $this, 'optimize_on_upload' ) );
-        add_action( 'wp_ajax_insight_hub_bulk_optimize', array( $this, 'bulk_optimize' ) );
+        add_action( 'wp_ajax_marketpulse_bulk_optimize', array( $this, 'bulk_optimize' ) );
     }
 
     /**
@@ -79,7 +79,7 @@ class Image_Optimization_Service {
      * @return array
      */
     private function get_stats() {
-        return get_option( 'insight_hub_image_stats', array(
+        return get_option( 'marketpulse_image_stats', array(
             'total_optimized' => 0,
             'bytes_saved'     => 0,
             'webp_converted'  => 0,
@@ -94,14 +94,14 @@ class Image_Optimization_Service {
      */
     private function update_stats( $new_stats ) {
         $this->stats = array_merge( $this->stats, $new_stats );
-        update_option( 'insight_hub_image_stats', $this->stats );
+        update_option( 'marketpulse_image_stats', $this->stats );
     }
 
     /**
      * Send stats to dashboard
      */
     public function send_stats() {
-        $this->api_client->make_request( INSIGHT_HUB_ENDPOINT_IMAGE_STATS, $this->stats );
+        $this->api_client->make_request( MARKETPULSE_ENDPOINT_IMAGE_STATS, $this->stats );
     }
 
 }

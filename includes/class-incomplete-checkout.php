@@ -11,29 +11,29 @@
  *  4. When order completes → send_to_api('converted') → dashboard marks row converted
  */
 
-namespace InsightHub;
+namespace MarketPulse;
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 class Incomplete_Checkout {
 
     public function __construct() {
-        error_log( 'INSIGHT_HUB: Incomplete_Checkout constructor called' );
+        error_log( 'MARKETPULSE: Incomplete_Checkout constructor called' );
 
         // Require license to be active
-        $license_key = get_option( INSIGHT_HUB_OPTION_LICENSE_KEY, '' );
+        $license_key = get_option( MARKETPULSE_OPTION_LICENSE_KEY, '' );
         if ( empty( $license_key ) ) {
-            error_log( 'INSIGHT_HUB: Incomplete_Checkout — no license key, skipping' );
+            error_log( 'MARKETPULSE: Incomplete_Checkout — no license key, skipping' );
             return;
         }
 
         // Only hook if WooCommerce is active
         if ( ! class_exists( 'WooCommerce' ) ) {
-            error_log( 'INSIGHT_HUB: Incomplete_Checkout — WooCommerce not active, skipping' );
+            error_log( 'MARKETPULSE: Incomplete_Checkout — WooCommerce not active, skipping' );
             return;
         }
 
-        error_log( 'INSIGHT_HUB: Incomplete_Checkout — hooks registered' );
+        error_log( 'MARKETPULSE: Incomplete_Checkout — hooks registered' );
 
         add_action( 'wp_enqueue_scripts',          [ $this, 'enqueue_checkout_script' ] );
         add_action( 'wp_ajax_ih_capture_checkout',        [ $this, 'handle_capture' ] );
@@ -48,12 +48,12 @@ class Incomplete_Checkout {
     public function enqueue_checkout_script() {
         if ( ! function_exists( 'is_checkout' ) || ! is_checkout() ) return;
 
-        $js_path = INSIGHT_HUB_PLUGIN_DIR . 'assets/js/incomplete-checkout.js';
+        $js_path = MARKETPULSE_PLUGIN_DIR . 'assets/js/incomplete-checkout.js';
         if ( ! file_exists( $js_path ) ) return;
 
         wp_enqueue_script(
             'ih-incomplete-checkout',
-            INSIGHT_HUB_PLUGIN_URL . 'assets/js/incomplete-checkout.js',
+            MARKETPULSE_PLUGIN_URL . 'assets/js/incomplete-checkout.js',
             [ 'jquery' ],
             filemtime( $js_path ),
             true
@@ -70,13 +70,13 @@ class Incomplete_Checkout {
        AJAX: Capture billing fields + cart
     ────────────────────────────────────────────── */
     public function handle_capture() {
-        error_log( 'INSIGHT_HUB: ih_capture_checkout AJAX fired' );
+        error_log( 'MARKETPULSE: ih_capture_checkout AJAX fired' );
         check_ajax_referer( 'ih_checkout_nonce', 'nonce' );
 
         $phone = sanitize_text_field( $_POST['billing_phone'] ?? '' );
         $email = sanitize_email( $_POST['billing_email'] ?? '' );
 
-        error_log( 'INSIGHT_HUB: capture — phone=' . $phone . ' email=' . $email );
+        error_log( 'MARKETPULSE: capture — phone=' . $phone . ' email=' . $email );
 
         if ( empty( $phone ) && empty( $email ) ) {
             wp_send_json_error( 'No contact info' );
@@ -180,13 +180,13 @@ class Incomplete_Checkout {
      * Send data to dashboard API (non-blocking)
      */
     private function send_to_api( $action, $checkout = null, $extra = [] ) {
-        $license_key = get_option( INSIGHT_HUB_OPTION_LICENSE_KEY, '' );
-        $api_base    = defined( 'INSIGHT_HUB_API_BASE_URL' ) ? INSIGHT_HUB_API_BASE_URL : get_option( 'insight_hub_api_url', '' );
+        $license_key = get_option( MARKETPULSE_OPTION_LICENSE_KEY, '' );
+        $api_base    = defined( 'MARKETPULSE_API_BASE_URL' ) ? MARKETPULSE_API_BASE_URL : get_option( 'marketpulse_api_url', '' );
 
-        error_log( 'INSIGHT_HUB: send_to_api action=' . $action . ' api_base=' . $api_base . ' has_key=' . ( ! empty( $license_key ) ? 'yes' : 'no' ) );
+        error_log( 'MARKETPULSE: send_to_api action=' . $action . ' api_base=' . $api_base . ' has_key=' . ( ! empty( $license_key ) ? 'yes' : 'no' ) );
 
         if ( empty( $license_key ) || empty( $api_base ) ) {
-            error_log( 'INSIGHT_HUB: send_to_api — missing license_key or api_base, aborting' );
+            error_log( 'MARKETPULSE: send_to_api — missing license_key or api_base, aborting' );
             return;
         }
 
@@ -213,11 +213,11 @@ class Incomplete_Checkout {
         );
 
         if ( is_wp_error( $response ) ) {
-            error_log( 'INSIGHT_HUB: webhook error — ' . $response->get_error_message() );
+            error_log( 'MARKETPULSE: webhook error — ' . $response->get_error_message() );
         } else {
             $code = wp_remote_retrieve_response_code( $response );
             $rbody = wp_remote_retrieve_body( $response );
-            error_log( 'INSIGHT_HUB: webhook response ' . $code . ' — ' . $rbody );
+            error_log( 'MARKETPULSE: webhook response ' . $code . ' — ' . $rbody );
         }
     }
 }

@@ -1,5 +1,5 @@
 <?php
-namespace InsightHub;
+namespace MarketPulse;
 
 /**
  * Data Sync — REST endpoints for fetching WooCommerce products, orders, customers
@@ -42,20 +42,20 @@ class Data_Sync {
     public function check_auth( $request ) {
         if ( current_user_can( 'manage_options' ) ) return true;
 
-        $stored_key = get_option( INSIGHT_HUB_OPTION_LICENSE_KEY, '' );
+        $stored_key = get_option( MARKETPULSE_OPTION_LICENSE_KEY, '' );
         if ( empty( $stored_key ) ) return false;
 
         // Raw key
         $key = $request->get_header( 'X-License-Key' );
         if ( ! $key ) $key = $request->get_param( 'license_key' );
         if ( $key && $key === $stored_key ) {
-            return get_option( INSIGHT_HUB_OPTION_LICENSE_STATUS, 'inactive' ) === 'active';
+            return get_option( MARKETPULSE_OPTION_LICENSE_STATUS, 'inactive' ) === 'active';
         }
 
         // Hash auth
         $hash = $request->get_header( 'X-Dashboard-Key-Hash' );
         if ( $hash && hash( 'sha256', $stored_key ) === $hash ) {
-            return get_option( INSIGHT_HUB_OPTION_LICENSE_STATUS, 'inactive' ) === 'active';
+            return get_option( MARKETPULSE_OPTION_LICENSE_STATUS, 'inactive' ) === 'active';
         }
 
         return false;

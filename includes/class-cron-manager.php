@@ -2,10 +2,10 @@
 /**
  * Cron Manager for Insight Hub
  *
- * @package InsightHub
+ * @package MarketPulse
  */
 
-namespace InsightHub;
+namespace MarketPulse;
 
 // Prevent direct access
 if ( ! defined( 'ABSPATH' ) ) {
@@ -30,15 +30,15 @@ class Cron_Manager {
     public function __construct() {
         $this->license_manager = new License_Manager();
         add_action( 'init', array( $this, 'schedule_heartbeat' ) );
-        add_action( INSIGHT_HUB_CRON_HEARTBEAT, array( $this, 'send_heartbeat' ) );
+        add_action( MARKETPULSE_CRON_HEARTBEAT, array( $this, 'send_heartbeat' ) );
     }
 
     /**
      * Schedule heartbeat
      */
     public function schedule_heartbeat() {
-        if ( ! wp_next_scheduled( INSIGHT_HUB_CRON_HEARTBEAT ) ) {
-            wp_schedule_event( time(), 'hourly', INSIGHT_HUB_CRON_HEARTBEAT );
+        if ( ! wp_next_scheduled( MARKETPULSE_CRON_HEARTBEAT ) ) {
+            wp_schedule_event( time(), 'hourly', MARKETPULSE_CRON_HEARTBEAT );
         }
     }
 
