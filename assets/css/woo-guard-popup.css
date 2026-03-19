@@ -1,0 +1,220 @@
+/* ============================================================
+   MarketPulse Guard Popup — mpg- prefix, CSS var driven
+   Uses clamp() for fluid sizing across all viewports
+   ============================================================ */
+
+.mpg-root {
+    --mpg-bg: #1a1a2e;
+    --mpg-text: #f1f5f9;
+    --mpg-accent: #8b5cf6;
+    --mpg-pad: clamp(20px, 5vw, 40px);
+    --mpg-gap-sm: clamp(10px, 2.5vw, 18px);
+    --mpg-gap-md: clamp(14px, 3vw, 24px);
+    --mpg-radius: clamp(12px, 3vw, 18px);
+    --mpg-radius-sm: clamp(8px, 2vw, 12px);
+    --mpg-font-title: clamp(16px, 4vw, 20px);
+    --mpg-font-body: clamp(12px, 3vw, 14px);
+    --mpg-font-sm: clamp(10px, 2.5vw, 13px);
+    --mpg-font-xs: clamp(9px, 2vw, 11px);
+    --mpg-icon-size: clamp(48px, 12vw, 72px);
+    --mpg-icon-svg: clamp(24px, 6vw, 36px);
+    --mpg-btn-pad-x: clamp(16px, 4vw, 24px);
+    --mpg-btn-pad-y: clamp(8px, 2vw, 10px);
+    --mpg-wrap-max: clamp(280px, 85vw, 400px);
+}
+
+/* ── Animations ─────────────────────────────────────────── */
+@keyframes mpg-fade-in { from { opacity: 0 } to { opacity: 1 } }
+@keyframes mpg-slide-up {
+    from { transform: translateY(20px) scale(.97); opacity: 0 }
+    to { transform: translateY(0) scale(1); opacity: 1 }
+}
+@keyframes mpg-fade-out { from { opacity: 1 } to { opacity: 0 } }
+@keyframes mpg-slide-down {
+    from { transform: translateY(0) scale(1); opacity: 1 }
+    to { transform: translateY(20px) scale(.97); opacity: 0 }
+}
+@keyframes mpg-rotate { 0% { transform: rotate(0deg) } 100% { transform: rotate(360deg) } }
+@keyframes mpg-pop {
+    0% { transform: scale(0); opacity: 0 }
+    60% { transform: scale(1.12); opacity: 1 }
+    80% { transform: scale(.96) }
+    100% { transform: scale(1) }
+}
+@keyframes mpg-draw { from { stroke-dashoffset: 24 } to { stroke-dashoffset: 0 } }
+
+/* ── Reset ─────────────────────────────────────────────── */
+.mpg-root,
+.mpg-root *,
+.mpg-root *::before,
+.mpg-root *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ── Overlay ───────────────────────────────────────────── */
+.mpg-root {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(12px, 3vw, 20px);
+    background: rgba(0, 0, 0, .7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    animation: mpg-fade-in .3s ease-out;
+}
+
+.mpg-root.mpg-closing { animation: mpg-fade-out .2s ease-in forwards }
+.mpg-root.mpg-closing .mpg-wrap { animation: mpg-slide-down .2s ease-in forwards }
+
+/* ── Card wrapper ──────────────────────────────────────── */
+.mpg-wrap {
+    position: relative;
+    max-width: var(--mpg-wrap-max);
+    width: 100%;
+    border-radius: calc(var(--mpg-radius) + 2px);
+    padding: 2px;
+    overflow: hidden;
+    animation: mpg-slide-up .4s cubic-bezier(.16, 1, .3, 1);
+}
+
+.mpg-border {
+    position: absolute;
+    inset: -150%;
+    background: conic-gradient(from 0deg, var(--mpg-accent), #6366f1, #3b82f6, var(--mpg-accent), #a855f7, #ec4899, var(--mpg-accent));
+    animation: mpg-rotate 4s linear infinite;
+    z-index: 0;
+}
+
+/* ── Card body ─────────────────────────────────────────── */
+.mpg-card {
+    position: relative;
+    background: var(--mpg-bg);
+    border-radius: var(--mpg-radius);
+    padding: var(--mpg-pad);
+    text-align: center;
+    outline: none;
+    z-index: 1;
+}
+
+/* ── Shield icon ───────────────────────────────────────── */
+.mpg-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--mpg-icon-size);
+    height: var(--mpg-icon-size);
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--mpg-accent) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--mpg-accent) 20%, transparent);
+    margin-bottom: var(--mpg-gap-sm);
+    animation: mpg-pop .6s cubic-bezier(.16, 1, .3, 1) .15s both;
+}
+
+.mpg-icon svg { width: var(--mpg-icon-svg); height: var(--mpg-icon-svg) }
+.mpg-icon .mpg-shield-fill { fill: color-mix(in srgb, var(--mpg-accent) 15%, transparent) }
+.mpg-icon .mpg-shield-stroke { stroke: var(--mpg-accent); stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round }
+.mpg-icon .mpg-x { stroke: var(--mpg-accent); stroke-width: 3.5; stroke-linecap: round; stroke-dasharray: 24; stroke-dashoffset: 24; animation: mpg-draw .4s ease-out forwards }
+.mpg-icon .mpg-x:nth-child(3) { animation-delay: .5s }
+.mpg-icon .mpg-x:nth-child(4) { animation-delay: .65s }
+
+/* ── Title ─────────────────────────────────────────────── */
+.mpg-title {
+    font-size: var(--mpg-font-title);
+    font-weight: 700;
+    color: var(--mpg-text);
+    line-height: 1.3;
+    letter-spacing: -.02em;
+    margin-bottom: var(--mpg-gap-sm);
+}
+
+/* ── Message box ───────────────────────────────────────── */
+.mpg-message {
+    background: color-mix(in srgb, var(--mpg-accent) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--mpg-accent) 20%, transparent);
+    border-radius: var(--mpg-radius-sm);
+    padding: clamp(10px, 2.5vw, 14px) clamp(12px, 3vw, 18px);
+    margin-bottom: var(--mpg-gap-md);
+    font-size: var(--mpg-font-body);
+    line-height: 1.6;
+    color: var(--mpg-text);
+    font-weight: 500;
+}
+
+/* ── Divider ───────────────────────────────────────────── */
+.mpg-divider {
+    height: 1px;
+    background: color-mix(in srgb, var(--mpg-text) 6%, transparent);
+    margin: 0 calc(var(--mpg-pad) * -1) var(--mpg-gap-sm);
+}
+
+/* ── Buttons ───────────────────────────────────────────── */
+.mpg-buttons {
+    display: flex;
+    gap: clamp(6px, 1.5vw, 10px);
+    justify-content: center;
+    margin-bottom: var(--mpg-gap-sm);
+}
+
+.mpg-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: var(--mpg-btn-pad-y) var(--mpg-btn-pad-x) !important;
+    border-radius: clamp(8px, 2vw, 10px) !important;
+    font-size: var(--mpg-font-sm) !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    min-width: clamp(80px, 20vw, 110px) !important;
+    line-height: 1 !important;
+    transition: all .2s cubic-bezier(.16, 1, .3, 1) !important;
+    text-decoration: none !important;
+    margin: 0 !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    box-shadow: none !important;
+}
+
+.mpg-btn:active { transform: scale(.96) !important }
+
+.mpg-btn-ghost {
+    background: transparent !important;
+    color: var(--mpg-accent) !important;
+    border: 1.5px solid color-mix(in srgb, var(--mpg-accent) 35%, transparent) !important;
+}
+
+.mpg-btn-ghost:hover {
+    background: color-mix(in srgb, var(--mpg-accent) 10%, transparent) !important;
+    border-color: color-mix(in srgb, var(--mpg-accent) 60%, transparent) !important;
+}
+
+.mpg-btn-solid {
+    background: var(--mpg-accent) !important;
+    color: #fff !important;
+    border: none !important;
+    box-shadow: 0 4px 14px -2px color-mix(in srgb, var(--mpg-accent) 40%, transparent) !important;
+}
+
+.mpg-btn-solid:hover {
+    filter: brightness(1.12) !important;
+    box-shadow: 0 6px 20px -2px color-mix(in srgb, var(--mpg-accent) 50%, transparent) !important;
+}
+
+/* ── Branding ──────────────────────────────────────────── */
+.mpg-brand {
+    font-size: var(--mpg-font-xs);
+    color: color-mix(in srgb, var(--mpg-text) 35%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.mpg-brand svg { width: clamp(10px, 2.5vw, 12px); height: clamp(10px, 2.5vw, 12px) }
+.mpg-brand a { color: var(--mpg-accent); text-decoration: none; font-weight: 600 }
+.mpg-brand a:hover { opacity: .8 }
