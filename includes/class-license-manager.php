@@ -157,6 +157,18 @@ class License_Manager {
             if ( isset( $response['installed_addons'] ) && is_array( $response['installed_addons'] ) ) {
                 update_option( 'BIZGROWHUB_installed_addons', $response['installed_addons'] );
             }
+
+            // Sync remote_config (woo_guard settings, etc.)
+            if ( isset( $response['remote_config'] ) && is_array( $response['remote_config'] ) ) {
+                error_log( 'bizgrowhub: Heartbeat received remote_config: ' . print_r( $response['remote_config'], true ) );
+                update_option( 'BIZGROWHUB_remote_config', $response['remote_config'] );
+
+                // Directly sync woo_guard if present (don't wait for update_option hook)
+                if ( isset( $response['remote_config']['woo_guard'] ) ) {
+                    \BizGrowHub\WooCommerce_Guard::sync_from_remote_config( $response['remote_config']['woo_guard'] );
+                    error_log( 'bizgrowhub: WooGuard synced from heartbeat. Enabled=' . var_export( get_option('BIZGROWHUB_wg_enabled'), true ) );
+                }
+            }
         }
 
         return $response;
