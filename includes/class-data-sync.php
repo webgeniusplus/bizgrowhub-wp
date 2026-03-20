@@ -1,5 +1,5 @@
 <?php
-namespace InsightHub;
+namespace BizGrowHub;
 
 /**
  * Data Sync — REST endpoints for fetching WooCommerce products, orders, customers
@@ -15,7 +15,7 @@ class Data_Sync {
     }
 
     public function register_routes() {
-        $namespace = 'insight-hub/v1';
+        $namespace = 'bizgrowhub/v1';
 
         register_rest_route( $namespace, '/sync/products', [
             'methods'             => 'GET',
@@ -42,27 +42,27 @@ class Data_Sync {
     public function check_auth( $request ) {
         if ( current_user_can( 'manage_options' ) ) return true;
 
-        $stored_key = get_option( INSIGHT_HUB_OPTION_LICENSE_KEY, '' );
+        $stored_key = get_option( BIZGROWHUB_OPTION_LICENSE_KEY, '' );
         if ( empty( $stored_key ) ) return false;
 
         // Raw key
         $key = $request->get_header( 'X-License-Key' );
         if ( ! $key ) $key = $request->get_param( 'license_key' );
         if ( $key && $key === $stored_key ) {
-            return get_option( INSIGHT_HUB_OPTION_LICENSE_STATUS, 'inactive' ) === 'active';
+            return get_option( BIZGROWHUB_OPTION_LICENSE_STATUS, 'inactive' ) === 'active';
         }
 
         // Hash auth
         $hash = $request->get_header( 'X-Dashboard-Key-Hash' );
         if ( $hash && hash( 'sha256', $stored_key ) === $hash ) {
-            return get_option( INSIGHT_HUB_OPTION_LICENSE_STATUS, 'inactive' ) === 'active';
+            return get_option( BIZGROWHUB_OPTION_LICENSE_STATUS, 'inactive' ) === 'active';
         }
 
         return false;
     }
 
     /**
-     * GET /insight-hub/v1/sync/products
+     * GET /bizgrowhub/v1/sync/products
      * Params: page, per_page, status, search
      */
     public function get_products( $request ) {
@@ -164,7 +164,7 @@ class Data_Sync {
     }
 
     /**
-     * GET /insight-hub/v1/sync/orders
+     * GET /bizgrowhub/v1/sync/orders
      */
     public function get_orders( $request ) {
         if ( ! class_exists( 'WooCommerce' ) ) {
@@ -238,7 +238,7 @@ class Data_Sync {
     }
 
     /**
-     * GET /insight-hub/v1/sync/customers
+     * GET /bizgrowhub/v1/sync/customers
      */
     public function get_customers( $request ) {
         $page     = max( 1, (int) $request->get_param( 'page' ) ?: 1 );

@@ -1,5 +1,5 @@
 <?php
-namespace InsightHub;
+namespace BizGrowHub;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -10,14 +10,14 @@ class API_Client {
     private $api_base_url;
 
     public function __construct() {
-        $this->api_base_url = INSIGHT_HUB_API_BASE_URL;
+        $this->api_base_url = BIZGROWHUB_API_BASE_URL;
     }
 
     /**
      * Get stored license key
      */
     private function get_license_key() {
-        return get_option( INSIGHT_HUB_OPTION_LICENSE_KEY, '' );
+        return get_option( BIZGROWHUB_OPTION_LICENSE_KEY, '' );
     }
 
     /**
@@ -37,7 +37,7 @@ class API_Client {
      */
     public function is_active() {
         return ! empty( $this->get_license_key() )
-            && get_option( INSIGHT_HUB_OPTION_LICENSE_STATUS, 'inactive' ) === 'active';
+            && get_option( BIZGROWHUB_OPTION_LICENSE_STATUS, 'inactive' ) === 'active';
     }
 
     /**

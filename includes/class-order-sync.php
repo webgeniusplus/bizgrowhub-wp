@@ -1,5 +1,5 @@
 <?php
-namespace InsightHub;
+namespace BizGrowHub;
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
@@ -12,7 +12,7 @@ class Order_Sync {
     private $api_base;
 
     public function __construct() {
-        $this->api_base = INSIGHT_HUB_API_BASE_URL;
+        $this->api_base = BIZGROWHUB_API_BASE_URL;
 
         // New order created (works with both classic & block checkout)
         add_action( 'woocommerce_new_order',           [ $this, 'sync_order' ], 20, 1 );
@@ -43,7 +43,7 @@ class Order_Sync {
         if ( isset( $syncing[ $order_id ] ) ) return;
         $syncing[ $order_id ] = true;
 
-        $license_key = get_option( INSIGHT_HUB_OPTION_LICENSE_KEY );
+        $license_key = get_option( BIZGROWHUB_OPTION_LICENSE_KEY );
         if ( empty( $license_key ) ) return;
 
         $order = wc_get_order( $order_id );

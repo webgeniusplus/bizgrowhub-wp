@@ -66,12 +66,12 @@
         clearStatusMessage();
 
         $.ajax({
-            url: insightHubAjax.ajax_url,
+            url: BizGrowHubAjax.ajax_url,
             type: 'POST',
             data: {
-                action: 'insight_hub_validate_license',
+                action: 'BIZGROWHUB_validate_license',
                 license_key: licenseKey,
-                nonce: insightHubAjax.nonce
+                nonce: BizGrowHubAjax.nonce
             },
             success: function(response) {
                 setButtonState('check', false);
@@ -93,12 +93,12 @@
         clearStatusMessage();
 
         $.ajax({
-            url: insightHubAjax.ajax_url,
+            url: BizGrowHubAjax.ajax_url,
             type: 'POST',
             data: {
-                action: 'insight_hub_activate_license',
+                action: 'BIZGROWHUB_activate_license',
                 license_key: licenseKey,
-                nonce: insightHubAjax.nonce
+                nonce: BizGrowHubAjax.nonce
             },
             success: function(response) {
                 setButtonState('activate', false);
@@ -124,11 +124,11 @@
         clearStatusMessage();
 
         $.ajax({
-            url: insightHubAjax.ajax_url,
+            url: BizGrowHubAjax.ajax_url,
             type: 'POST',
             data: {
-                action: 'insight_hub_deactivate_license',
-                nonce: insightHubAjax.nonce
+                action: 'BIZGROWHUB_deactivate_license',
+                nonce: BizGrowHubAjax.nonce
             },
             success: function(response) {
                 setButtonState('deactivate', false);

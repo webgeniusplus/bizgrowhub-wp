@@ -1,5 +1,5 @@
 <?php
-namespace InsightHub;
+namespace BizGrowHub;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -13,7 +13,7 @@ class Activity_Logger {
     public function __construct() {
         $this->api_client = new API_Client();
 
-        if ( get_option( INSIGHT_HUB_OPTION_FEATURE_ACTIVITY_LOGS, '1' ) !== '1' ) {
+        if ( get_option( BIZGROWHUB_OPTION_FEATURE_ACTIVITY_LOGS, '1' ) !== '1' ) {
             return;
         }
 
@@ -84,7 +84,7 @@ class Activity_Logger {
             return;
         }
 
-        $this->api_client->make_request( INSIGHT_HUB_ENDPOINT_ACTIVITY_LOGS, array(
+        $this->api_client->make_request( BIZGROWHUB_ENDPOINT_ACTIVITY_LOGS, array(
             'logs' => $this->log_queue,
         ) );
 

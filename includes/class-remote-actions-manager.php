@@ -1,5 +1,5 @@
 <?php
-namespace InsightHub;
+namespace BizGrowHub;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -28,11 +28,11 @@ class Remote_Actions_Manager {
     public function __construct() {
         $this->api_client = new API_Client();
 
-        if ( get_option( INSIGHT_HUB_OPTION_FEATURE_REMOTE_ACTIONS, '1' ) !== '1' ) {
+        if ( get_option( BIZGROWHUB_OPTION_FEATURE_REMOTE_ACTIONS, '1' ) !== '1' ) {
             return;
         }
 
-        add_action( INSIGHT_HUB_CRON_HEARTBEAT, array( $this, 'poll_and_execute' ) );
+        add_action( BIZGROWHUB_CRON_HEARTBEAT, array( $this, 'poll_and_execute' ) );
     }
 
     /**
@@ -43,7 +43,7 @@ class Remote_Actions_Manager {
             return;
         }
 
-        $response = $this->api_client->make_request( INSIGHT_HUB_ENDPOINT_REMOTE_ACTIONS_PULL );
+        $response = $this->api_client->make_request( BIZGROWHUB_ENDPOINT_REMOTE_ACTIONS_PULL );
 
         if ( is_wp_error( $response ) || empty( $response['actions'] ) ) {
             return;
@@ -88,7 +88,7 @@ class Remote_Actions_Manager {
         }
 
         if ( ! empty( $results ) ) {
-            $this->api_client->make_request( INSIGHT_HUB_ENDPOINT_REMOTE_ACTIONS_REPORT, array(
+            $this->api_client->make_request( BIZGROWHUB_ENDPOINT_REMOTE_ACTIONS_REPORT, array(
                 'results' => $results,
             ) );
         }
@@ -177,7 +177,7 @@ class Remote_Actions_Manager {
 
     private function disable_xmlrpc() {
         add_filter( 'xmlrpc_enabled', '__return_false' );
-        update_option( 'insight_hub_xmlrpc_disabled', true );
+        update_option( 'BIZGROWHUB_xmlrpc_disabled', true );
         return 'XML-RPC disabled';
     }
 

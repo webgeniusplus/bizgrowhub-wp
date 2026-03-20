@@ -1,5 +1,5 @@
 <?php
-namespace InsightHub;
+namespace BizGrowHub;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -13,7 +13,7 @@ class Event_Tracker {
     public function __construct() {
         $this->api_client = new API_Client();
 
-        if ( get_option( INSIGHT_HUB_OPTION_FEATURE_EVENT_TRACKING, '1' ) !== '1' ) {
+        if ( get_option( BIZGROWHUB_OPTION_FEATURE_EVENT_TRACKING, '1' ) !== '1' ) {
             return;
         }
 
@@ -79,7 +79,7 @@ class Event_Tracker {
             return;
         }
 
-        $this->api_client->make_request( INSIGHT_HUB_ENDPOINT_EVENTS_INGEST, array(
+        $this->api_client->make_request( BIZGROWHUB_ENDPOINT_EVENTS_INGEST, array(
             'events' => $this->event_queue,
         ) );
 
@@ -168,14 +168,14 @@ class Event_Tracker {
             return;
         }
 
-        $license_key = get_option( INSIGHT_HUB_OPTION_LICENSE_KEY, '' );
+        $license_key = get_option( BIZGROWHUB_OPTION_LICENSE_KEY, '' );
         if ( empty( $license_key ) ) {
             return;
         }
 
         // Config inline (public — key only allows event writes, no read access)
-        echo '<script>window.__MP={k:"' . esc_js( $license_key ) . '",api:"' . esc_js( INSIGHT_HUB_API_BASE_URL ) . '/events/ingest"};</script>' . "\n";
-        echo '<script src="' . esc_url( INSIGHT_HUB_PLUGIN_URL . 'assets/js/tracker.js' ) . '?v=' . INSIGHT_HUB_VERSION . '" defer></script>' . "\n";
+        echo '<script>window.__MP={k:"' . esc_js( $license_key ) . '",api:"' . esc_js( BIZGROWHUB_API_BASE_URL ) . '/events/ingest"};</script>' . "\n";
+        echo '<script src="' . esc_url( BIZGROWHUB_PLUGIN_URL . 'assets/js/tracker.js' ) . '?v=' . BIZGROWHUB_VERSION . '" defer></script>' . "\n";
     }
 
     private function get_user_ip() {

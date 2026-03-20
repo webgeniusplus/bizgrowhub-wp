@@ -2,10 +2,10 @@
 /**
  * Admin Settings for Insight Hub
  *
- * @package InsightHub
+ * @package BizGrowHub
  */
 
-namespace InsightHub;
+namespace BizGrowHub;
 
 // Prevent direct access
 if ( ! defined( 'ABSPATH' ) ) {
@@ -30,14 +30,14 @@ class Admin_Settings {
     public function __construct() {
         $this->license_manager = new License_Manager();
         add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
-        add_action( 'admin_post_insight_hub_settings', array( $this, 'handle_form' ) );
+        add_action( 'admin_post_BIZGROWHUB_settings', array( $this, 'handle_form' ) );
         // Feature toggles & GA4 now managed from dashboard — no local form handlers needed
         add_action( 'rest_api_init', array( $this, 'register_settings_rest_routes' ) );
         
         // AJAX handlers
-        add_action( 'wp_ajax_insight_hub_validate_license', array( $this, 'ajax_validate_license' ) );
-        add_action( 'wp_ajax_insight_hub_activate_license', array( $this, 'ajax_activate_license' ) );
-        add_action( 'wp_ajax_insight_hub_deactivate_license', array( $this, 'ajax_deactivate_license' ) );
+        add_action( 'wp_ajax_BIZGROWHUB_validate_license', array( $this, 'ajax_validate_license' ) );
+        add_action( 'wp_ajax_BIZGROWHUB_activate_license', array( $this, 'ajax_activate_license' ) );
+        add_action( 'wp_ajax_BIZGROWHUB_deactivate_license', array( $this, 'ajax_deactivate_license' ) );
         
         // Enqueue scripts
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
@@ -50,8 +50,8 @@ class Admin_Settings {
         add_menu_page(
             'BizGrowHub',
             'BizGrowHub',
-            INSIGHT_HUB_CAPABILITY_MANAGE,
-            'insight-hub',
+            BIZGROWHUB_CAPABILITY_MANAGE,
+            'bizgrowhub',
             array( $this, 'settings_page' ),
             'dashicons-store',
             30
@@ -62,11 +62,11 @@ class Admin_Settings {
      * Settings page
      */
     public function settings_page() {
-        if ( ! current_user_can( INSIGHT_HUB_CAPABILITY_MANAGE ) ) {
+        if ( ! current_user_can( BIZGROWHUB_CAPABILITY_MANAGE ) ) {
             wp_die( 'You do not have sufficient permissions to access this page.' );
         }
 
-        $license_key = get_option( INSIGHT_HUB_OPTION_LICENSE_KEY, '' );
+        $license_key = get_option( BIZGROWHUB_OPTION_LICENSE_KEY, '' );
         $status = $this->license_manager->get_license_status();
         $last_heartbeat = $this->license_manager->get_last_heartbeat();
         $is_active = ( $status === 'active' );
@@ -138,7 +138,7 @@ class Admin_Settings {
                         <span class="mp-info-value"><code><?php echo esc_html( get_site_url() ); ?></code></span>
 
                         <span class="mp-info-label">Plugin Version</span>
-                        <span class="mp-info-value"><code><?php echo esc_html( INSIGHT_HUB_VERSION ); ?></code></span>
+                        <span class="mp-info-value"><code><?php echo esc_html( BIZGROWHUB_VERSION ); ?></code></span>
 
                         <span class="mp-info-label">WordPress</span>
                         <span class="mp-info-value"><code><?php echo esc_html( get_bloginfo( 'version' ) ); ?></code></span>
@@ -157,9 +157,9 @@ class Admin_Settings {
                     <div class="mp-card-header">&#x1f517; Activation Details</div>
                     <div class="mp-info-grid">
                         <?php
-                            $project_name  = get_option( 'insight_hub_project_name', '' );
-                            $project_id    = get_option( 'insight_hub_project_id', '' );
-                            $activation_id = get_option( 'insight_hub_activation_id', '' );
+                            $project_name  = get_option( 'BIZGROWHUB_project_name', '' );
+                            $project_id    = get_option( 'BIZGROWHUB_project_id', '' );
+                            $activation_id = get_option( 'BIZGROWHUB_activation_id', '' );
                         ?>
                         <?php if ( $project_name ) : ?>
                             <span class="mp-info-label">Site Name</span>
@@ -216,7 +216,7 @@ class Admin_Settings {
        ================================================================ */
 
     public function register_settings_rest_routes() {
-        $namespace = 'insight-hub/v1';
+        $namespace = 'bizgrowhub/v1';
 
         register_rest_route( $namespace, '/settings/features', [
             [
@@ -251,7 +251,7 @@ class Admin_Settings {
     public function check_license_auth( $request ) {
         if ( current_user_can( 'manage_options' ) ) return true;
 
-        $stored_key = get_option( INSIGHT_HUB_OPTION_LICENSE_KEY, '' );
+        $stored_key = get_option( BIZGROWHUB_OPTION_LICENSE_KEY, '' );
 
         // License key auth (raw key)
         $license_key = $request->get_header( 'X-License-Key' );
@@ -260,7 +260,7 @@ class Admin_Settings {
             $license_key = $params['license_key'] ?? null;
         }
         if ( $license_key && ! empty( $stored_key ) && $license_key === $stored_key ) {
-            $status = get_option( INSIGHT_HUB_OPTION_LICENSE_STATUS, 'inactive' );
+            $status = get_option( BIZGROWHUB_OPTION_LICENSE_STATUS, 'inactive' );
             if ( $status === 'active' ) return true;
         }
 
@@ -283,12 +283,12 @@ class Admin_Settings {
      */
     public function rest_get_features() {
         return new \WP_REST_Response( [ 'success' => true, 'data' => [
-            'event_tracking' => get_option( INSIGHT_HUB_OPTION_FEATURE_EVENT_TRACKING, '1' ) === '1',
-            'activity_logs'  => get_option( INSIGHT_HUB_OPTION_FEATURE_ACTIVITY_LOGS, '1' ) === '1',
-            'site_health'    => get_option( INSIGHT_HUB_OPTION_FEATURE_SITE_HEALTH, '1' ) === '1',
-            'wc_guard'       => get_option( INSIGHT_HUB_OPTION_FEATURE_WC_GUARD, '1' ) === '1',
-            'image_opt'      => get_option( INSIGHT_HUB_OPTION_FEATURE_IMAGE_OPT, '1' ) === '1',
-            'remote_actions' => get_option( INSIGHT_HUB_OPTION_FEATURE_REMOTE_ACTIONS, '1' ) === '1',
+            'event_tracking' => get_option( BIZGROWHUB_OPTION_FEATURE_EVENT_TRACKING, '1' ) === '1',
+            'activity_logs'  => get_option( BIZGROWHUB_OPTION_FEATURE_ACTIVITY_LOGS, '1' ) === '1',
+            'site_health'    => get_option( BIZGROWHUB_OPTION_FEATURE_SITE_HEALTH, '1' ) === '1',
+            'wc_guard'       => get_option( BIZGROWHUB_OPTION_FEATURE_WC_GUARD, '1' ) === '1',
+            'image_opt'      => get_option( BIZGROWHUB_OPTION_FEATURE_IMAGE_OPT, '1' ) === '1',
+            'remote_actions' => get_option( BIZGROWHUB_OPTION_FEATURE_REMOTE_ACTIONS, '1' ) === '1',
         ] ] );
     }
 
@@ -300,12 +300,12 @@ class Admin_Settings {
         $features = $params['features'] ?? $params;
 
         $map = [
-            'event_tracking' => INSIGHT_HUB_OPTION_FEATURE_EVENT_TRACKING,
-            'activity_logs'  => INSIGHT_HUB_OPTION_FEATURE_ACTIVITY_LOGS,
-            'site_health'    => INSIGHT_HUB_OPTION_FEATURE_SITE_HEALTH,
-            'wc_guard'       => INSIGHT_HUB_OPTION_FEATURE_WC_GUARD,
-            'image_opt'      => INSIGHT_HUB_OPTION_FEATURE_IMAGE_OPT,
-            'remote_actions' => INSIGHT_HUB_OPTION_FEATURE_REMOTE_ACTIONS,
+            'event_tracking' => BIZGROWHUB_OPTION_FEATURE_EVENT_TRACKING,
+            'activity_logs'  => BIZGROWHUB_OPTION_FEATURE_ACTIVITY_LOGS,
+            'site_health'    => BIZGROWHUB_OPTION_FEATURE_SITE_HEALTH,
+            'wc_guard'       => BIZGROWHUB_OPTION_FEATURE_WC_GUARD,
+            'image_opt'      => BIZGROWHUB_OPTION_FEATURE_IMAGE_OPT,
+            'remote_actions' => BIZGROWHUB_OPTION_FEATURE_REMOTE_ACTIONS,
         ];
 
         foreach ( $map as $key => $option ) {
@@ -314,7 +314,7 @@ class Admin_Settings {
             }
         }
 
-        error_log( 'INSIGHT_HUB: Feature toggles updated via REST API: ' . print_r( $features, true ) );
+        error_log( 'bizgrowhub: Feature toggles updated via REST API: ' . print_r( $features, true ) );
         return $this->rest_get_features();
     }
 
@@ -323,8 +323,8 @@ class Admin_Settings {
      */
     public function rest_get_ga4() {
         return new \WP_REST_Response( [ 'success' => true, 'data' => [
-            'measurement_id' => get_option( INSIGHT_HUB_OPTION_GA4_MEASUREMENT_ID, '' ),
-            'property_id'    => get_option( INSIGHT_HUB_OPTION_GA4_PROPERTY_ID, '' ),
+            'measurement_id' => get_option( BIZGROWHUB_OPTION_GA4_MEASUREMENT_ID, '' ),
+            'property_id'    => get_option( BIZGROWHUB_OPTION_GA4_PROPERTY_ID, '' ),
         ] ] );
     }
 
@@ -335,13 +335,13 @@ class Admin_Settings {
         $params = $request->get_json_params();
 
         if ( isset( $params['measurement_id'] ) ) {
-            update_option( INSIGHT_HUB_OPTION_GA4_MEASUREMENT_ID, sanitize_text_field( $params['measurement_id'] ) );
+            update_option( BIZGROWHUB_OPTION_GA4_MEASUREMENT_ID, sanitize_text_field( $params['measurement_id'] ) );
         }
         if ( isset( $params['property_id'] ) ) {
-            update_option( INSIGHT_HUB_OPTION_GA4_PROPERTY_ID, sanitize_text_field( $params['property_id'] ) );
+            update_option( BIZGROWHUB_OPTION_GA4_PROPERTY_ID, sanitize_text_field( $params['property_id'] ) );
         }
 
-        error_log( 'INSIGHT_HUB: GA4 settings updated via REST API' );
+        error_log( 'bizgrowhub: GA4 settings updated via REST API' );
         return $this->rest_get_ga4();
     }
 
@@ -349,12 +349,12 @@ class Admin_Settings {
      * Handle form submission
      */
     public function handle_form() {
-        if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['_wpnonce'] ), 'insight_hub_settings' ) ) {
-            wp_die( __( 'Security check failed.', 'insight-hub' ) );
+        if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['_wpnonce'] ), 'BIZGROWHUB_settings' ) ) {
+            wp_die( __( 'Security check failed.', 'bizgrowhub' ) );
         }
 
-        if ( ! current_user_can( INSIGHT_HUB_CAPABILITY_MANAGE ) ) {
-            wp_die( __( 'You do not have permission to do this.', 'insight-hub' ) );
+        if ( ! current_user_can( BIZGROWHUB_CAPABILITY_MANAGE ) ) {
+            wp_die( __( 'You do not have permission to do this.', 'bizgrowhub' ) );
         }
 
         if ( isset( $_POST['activate'] ) ) {
@@ -369,23 +369,23 @@ class Admin_Settings {
      */
     private function handle_activate() {
         if ( ! isset( $_POST['license_key'] ) ) {
-            wp_redirect( add_query_arg( 'error', 'empty_key', admin_url( 'admin.php?page=insight-hub' ) ) );
+            wp_redirect( add_query_arg( 'error', 'empty_key', admin_url( 'admin.php?page=bizgrowhub' ) ) );
             exit;
         }
         $license_key = sanitize_text_field( wp_unslash( $_POST['license_key'] ) );
 
         if ( empty( $license_key ) ) {
-            wp_redirect( add_query_arg( 'error', 'empty_key', admin_url( 'admin.php?page=insight-hub' ) ) );
+            wp_redirect( add_query_arg( 'error', 'empty_key', admin_url( 'admin.php?page=bizgrowhub' ) ) );
             exit;
         }
 
         $result = $this->license_manager->activate_license( $license_key );
 
         if ( is_wp_error( $result ) ) {
-            wp_redirect( add_query_arg( 'error', urlencode( $result->get_error_message() ), admin_url( 'admin.php?page=insight-hub' ) ) );
+            wp_redirect( add_query_arg( 'error', urlencode( $result->get_error_message() ), admin_url( 'admin.php?page=bizgrowhub' ) ) );
             exit;
         } else {
-            wp_redirect( admin_url( 'admin.php?page=insight-hub&activated=1' ) );
+            wp_redirect( admin_url( 'admin.php?page=bizgrowhub&activated=1' ) );
             exit;
         }
     }
@@ -397,10 +397,10 @@ class Admin_Settings {
         $result = $this->license_manager->deactivate_license();
 
         if ( is_wp_error( $result ) ) {
-            wp_redirect( add_query_arg( 'error', urlencode( $result->get_error_message() ), admin_url( 'admin.php?page=insight-hub' ) ) );
+            wp_redirect( add_query_arg( 'error', urlencode( $result->get_error_message() ), admin_url( 'admin.php?page=bizgrowhub' ) ) );
             exit;
         } else {
-            wp_redirect( admin_url( 'admin.php?page=insight-hub&deactivated=1' ) );
+            wp_redirect( admin_url( 'admin.php?page=bizgrowhub&deactivated=1' ) );
             exit;
         }
     }
@@ -409,40 +409,40 @@ class Admin_Settings {
      * Enqueue scripts
      */
     public function enqueue_scripts( $hook ) {
-        if ( 'toplevel_page_insight-hub' !== $hook ) {
+        if ( 'toplevel_page_bizgrowhub' !== $hook ) {
             return;
         }
 
         wp_enqueue_style(
             'BizGrowHub-admin',
-            INSIGHT_HUB_PLUGIN_URL . 'assets/css/admin.css',
+            BIZGROWHUB_PLUGIN_URL . 'assets/css/admin.css',
             array(),
-            INSIGHT_HUB_VERSION
+            BIZGROWHUB_VERSION
         );
 
         wp_enqueue_script(
-            'insight-hub-admin',
-            INSIGHT_HUB_PLUGIN_URL . 'assets/js/admin.js',
+            'bizgrowhub-admin',
+            BIZGROWHUB_PLUGIN_URL . 'assets/js/admin.js',
             array( 'jquery' ),
-            INSIGHT_HUB_VERSION,
+            BIZGROWHUB_VERSION,
             true
         );
 
-        wp_localize_script( 'insight-hub-admin', 'insightHubAjax', array(
+        wp_localize_script( 'bizgrowhub-admin', 'BizGrowHubAjax', array(
             'ajax_url'       => admin_url( 'admin-ajax.php' ),
-            'nonce'          => wp_create_nonce( 'insight_hub_ajax' ),
+            'nonce'          => wp_create_nonce( 'BIZGROWHUB_ajax' ),
             'site_url'       => get_site_url(),
             'domain'         => wp_parse_url( get_site_url(), PHP_URL_HOST ),
-            'plugin_version' => INSIGHT_HUB_VERSION,
+            'plugin_version' => BIZGROWHUB_VERSION,
             'wp_version'     => get_bloginfo( 'version' ),
             'php_version'    => phpversion(),
             'strings'        => array(
-                'checking'     => __( 'Checking...', 'insight-hub' ),
-                'activating'   => __( 'Activating...', 'insight-hub' ),
-                'deactivating' => __( 'Deactivating...', 'insight-hub' ),
-                'activate'     => __( 'Activate License', 'insight-hub' ),
-                'deactivate'   => __( 'Deactivate License', 'insight-hub' ),
-                'check'        => __( 'Check License', 'insight-hub' ),
+                'checking'     => __( 'Checking...', 'bizgrowhub' ),
+                'activating'   => __( 'Activating...', 'bizgrowhub' ),
+                'deactivating' => __( 'Deactivating...', 'bizgrowhub' ),
+                'activate'     => __( 'Activate License', 'bizgrowhub' ),
+                'deactivate'   => __( 'Deactivate License', 'bizgrowhub' ),
+                'check'        => __( 'Check License', 'bizgrowhub' ),
             ),
         ) );
     }
@@ -451,16 +451,16 @@ class Admin_Settings {
      * AJAX handler for license validation
      */
     public function ajax_validate_license() {
-        check_ajax_referer( 'insight_hub_ajax', 'nonce' );
+        check_ajax_referer( 'BIZGROWHUB_ajax', 'nonce' );
 
-        if ( ! current_user_can( INSIGHT_HUB_CAPABILITY_MANAGE ) ) {
-            wp_send_json_error( array( 'message' => __( 'Permission denied.', 'insight-hub' ) ) );
+        if ( ! current_user_can( BIZGROWHUB_CAPABILITY_MANAGE ) ) {
+            wp_send_json_error( array( 'message' => __( 'Permission denied.', 'bizgrowhub' ) ) );
         }
 
         $license_key = isset( $_POST['license_key'] ) ? sanitize_text_field( wp_unslash( $_POST['license_key'] ) ) : '';
 
         if ( empty( $license_key ) ) {
-            wp_send_json_error( array( 'message' => __( 'License key is required.', 'insight-hub' ) ) );
+            wp_send_json_error( array( 'message' => __( 'License key is required.', 'bizgrowhub' ) ) );
         }
 
         $license_manager = new License_Manager();
@@ -472,7 +472,7 @@ class Admin_Settings {
         }
 
         wp_send_json_success( array(
-            'message' => __( 'License is valid.', 'insight-hub' ),
+            'message' => __( 'License is valid.', 'bizgrowhub' ),
             'data'    => $result,
         ) );
     }
@@ -481,16 +481,16 @@ class Admin_Settings {
      * AJAX handler for license activation
      */
     public function ajax_activate_license() {
-        check_ajax_referer( 'insight_hub_ajax', 'nonce' );
+        check_ajax_referer( 'BIZGROWHUB_ajax', 'nonce' );
 
-        if ( ! current_user_can( INSIGHT_HUB_CAPABILITY_MANAGE ) ) {
-            wp_send_json_error( array( 'message' => __( 'Permission denied.', 'insight-hub' ) ) );
+        if ( ! current_user_can( BIZGROWHUB_CAPABILITY_MANAGE ) ) {
+            wp_send_json_error( array( 'message' => __( 'Permission denied.', 'bizgrowhub' ) ) );
         }
 
         $license_key = isset( $_POST['license_key'] ) ? sanitize_text_field( wp_unslash( $_POST['license_key'] ) ) : '';
 
         if ( empty( $license_key ) ) {
-            wp_send_json_error( array( 'message' => __( 'License key is required.', 'insight-hub' ) ) );
+            wp_send_json_error( array( 'message' => __( 'License key is required.', 'bizgrowhub' ) ) );
         }
 
         $license_manager = new License_Manager();
@@ -507,7 +507,7 @@ class Admin_Settings {
         }
 
         wp_send_json_success( array(
-            'message' => __( 'License activated successfully.', 'insight-hub' ),
+            'message' => __( 'License activated successfully.', 'bizgrowhub' ),
             'data'    => $result,
         ) );
     }
@@ -516,10 +516,10 @@ class Admin_Settings {
      * AJAX handler for license deactivation
      */
     public function ajax_deactivate_license() {
-        check_ajax_referer( 'insight_hub_ajax', 'nonce' );
+        check_ajax_referer( 'BIZGROWHUB_ajax', 'nonce' );
 
-        if ( ! current_user_can( INSIGHT_HUB_CAPABILITY_MANAGE ) ) {
-            wp_send_json_error( array( 'message' => __( 'Permission denied.', 'insight-hub' ) ) );
+        if ( ! current_user_can( BIZGROWHUB_CAPABILITY_MANAGE ) ) {
+            wp_send_json_error( array( 'message' => __( 'Permission denied.', 'bizgrowhub' ) ) );
         }
 
         $license_manager = new License_Manager();
@@ -531,7 +531,7 @@ class Admin_Settings {
         }
 
         wp_send_json_success( array(
-            'message' => __( 'License deactivated successfully.', 'insight-hub' ),
+            'message' => __( 'License deactivated successfully.', 'bizgrowhub' ),
             'data'    => $result,
         ) );
     }
