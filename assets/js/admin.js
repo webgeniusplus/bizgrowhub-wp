@@ -123,6 +123,8 @@
         setButtonState('deactivate', true);
         clearStatusMessage();
 
+        console.log('[BizGrowHub] Deactivating license...');
+
         $.ajax({
             url: BizGrowHubAjax.ajax_url,
             type: 'POST',
@@ -131,6 +133,7 @@
                 nonce: BizGrowHubAjax.nonce
             },
             success: function(response) {
+                console.log('[BizGrowHub] Deactivate response:', JSON.stringify(response));
                 setButtonState('deactivate', false);
                 if (response.success) {
                     showStatusMessage(response.data.message, 'success');
@@ -138,12 +141,15 @@
                     updateButtonVisibility();
                     setTimeout(function() { location.reload(); }, 1500);
                 } else {
-                    showStatusMessage(response.data.message || 'Deactivation failed.', 'error');
+                    var msg = (response.data && response.data.message) ? response.data.message : 'Deactivation failed.';
+                    console.log('[BizGrowHub] Deactivate error:', msg);
+                    showStatusMessage(msg, 'error');
                 }
             },
-            error: function() {
+            error: function(xhr, status, err) {
+                console.log('[BizGrowHub] Deactivate AJAX error:', status, err, xhr.responseText);
                 setButtonState('deactivate', false);
-                showStatusMessage('Connection error. Please try again.', 'error');
+                showStatusMessage('Connection error: ' + err, 'error');
             }
         });
     }

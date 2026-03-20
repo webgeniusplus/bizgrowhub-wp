@@ -527,11 +527,16 @@ class Admin_Settings {
             wp_send_json_error( array( 'message' => __( 'Permission denied.', 'bizgrowhub' ) ) );
         }
 
+        $license_key = get_option( BIZGROWHUB_OPTION_LICENSE_KEY, '' );
+        $domain      = wp_parse_url( get_site_url(), PHP_URL_HOST );
+        error_log( '[BizGrowHub] Deactivate called. Key: ' . substr($license_key,0,12) . '... Domain: ' . $domain );
+
         $license_manager = new License_Manager();
         $result = $license_manager->deactivate_license();
 
+        error_log( '[BizGrowHub] Deactivate result: ' . ( is_wp_error($result) ? 'WP_Error: ' . $result->get_error_message() : wp_json_encode($result) ) );
+
         if ( is_wp_error( $result ) ) {
-            error_log( 'Insight Hub: License deactivation failed - ' . $result->get_error_message() );
             wp_send_json_error( array( 'message' => $result->get_error_message() ) );
         }
 
