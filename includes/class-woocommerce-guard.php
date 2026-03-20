@@ -79,9 +79,11 @@ class WooCommerce_Guard {
         // Always register REST routes
         add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
 
-        // Always register checkout hook — check enabled inside the function (like reference plugin)
+        // Standard checkout hook
         add_action( 'woocommerce_checkout_process', [ $this, 'check_order_limits' ] );
-        error_log( 'bizgrowhub WooGuard: Registered woocommerce_checkout_process hook' );
+        // CartFlows / custom checkout compatibility — fires with $data + $errors WP_Error
+        add_action( 'woocommerce_after_checkout_validation', [ $this, 'check_order_limits_validation' ], 10, 2 );
+        error_log( 'bizgrowhub WooGuard: Registered checkout hooks (process + after_validation)' );
 
         // AJAX pre-validation for popup
         add_action( 'wp_ajax_woo_guard_validate', [ $this, 'ajax_validate_order' ] );
@@ -248,6 +250,83 @@ class WooCommerce_Guard {
         }
 
         error_log( 'bizgrowhub WooGuard: All checks passed, allowing order' );
+    }
+
+    /**
+     * CartFlows/custom checkout compatibility hook.
+     * woocommerce_after_checkout_validation receives $data array + $errors WP_Error.
+     */
+    public function check_order_limits_validation( $data, $errors ) {
+        error_log( 'bizgrowhub WooGuard: after_checkout_validation hook triggered' );
+
+        $settings = self::get_settings();
+        if ( ! $settings['enabled'] ) {
+            error_log( 'bizgrowhub WooGuard: Disabled, skipping validation hook' );
+            return;
+        }
+
+        $phone = isset( $data['billing_phone'] ) ? sanitize_text_field( $data['billing_phone'] ) : '';
+        $email = isset( $data['billing_email'] ) ? sanitize_email( $data['billing_email'] ) : '';
+        $ip    = \WC_Geolocation::get_ip_address();
+
+        error_log( "bizgrowhub WooGuard [validation]: phone=$phone, email=$email, ip=$ip" );
+
+        $rl_msg      = $settings['rate_limit_message'];
+        $bl_msg      = $settings['blacklist_message'];
+        $time_hours  = $settings['time_hours'];
+        $order_limit = $settings['order_limit'];
+
+        // 1. Order limit checks
+        if ( $settings['check_phone'] && ! empty( $phone ) ) {
+            if ( $this->check_order_limit( 'billing_phone', $phone, $time_hours, $order_limit ) ) {
+                error_log( 'bizgrowhub WooGuard [validation]: Blocking — phone rate limit' );
+                $errors->add( 'wooguard_rate_limit', $rl_msg );
+                $this->report_block_to_api( 'rate_limit', 'phone', $email, $phone, $ip );
+                return;
+            }
+        }
+        if ( $settings['check_email'] && ! empty( $email ) ) {
+            if ( $this->check_order_limit( 'billing_email', $email, $time_hours, $order_limit ) ) {
+                error_log( 'bizgrowhub WooGuard [validation]: Blocking — email rate limit' );
+                $errors->add( 'wooguard_rate_limit', $rl_msg );
+                $this->report_block_to_api( 'rate_limit', 'email', $email, $phone, $ip );
+                return;
+            }
+        }
+        if ( $settings['check_ip'] && ! empty( $ip ) ) {
+            if ( $this->check_order_limit( 'customer_ip_address', $ip, $time_hours, $order_limit ) ) {
+                error_log( 'bizgrowhub WooGuard [validation]: Blocking — IP rate limit' );
+                $errors->add( 'wooguard_rate_limit', $rl_msg );
+                $this->report_block_to_api( 'rate_limit', 'ip', $email, $phone, $ip );
+                return;
+            }
+        }
+
+        // 2. Blacklist checks
+        $blocked_emails = (array) $settings['blocked_emails'];
+        $blocked_ips    = (array) $settings['blocked_ips'];
+        $blocked_phones = (array) $settings['blocked_phones'];
+
+        if ( $email && in_array( strtolower( $email ), array_map( 'strtolower', $blocked_emails ), true ) ) {
+            error_log( 'bizgrowhub WooGuard [validation]: Blocking — email blacklisted' );
+            $errors->add( 'wooguard_blacklist', $bl_msg );
+            $this->report_block_to_api( 'blacklist', 'email', $email, $phone, $ip );
+            return;
+        }
+        if ( $ip && in_array( $ip, $blocked_ips, true ) ) {
+            error_log( 'bizgrowhub WooGuard [validation]: Blocking — IP blacklisted' );
+            $errors->add( 'wooguard_blacklist', $bl_msg );
+            $this->report_block_to_api( 'blacklist', 'ip', $email, $phone, $ip );
+            return;
+        }
+        if ( $phone && in_array( $phone, $blocked_phones, true ) ) {
+            error_log( 'bizgrowhub WooGuard [validation]: Blocking — phone blacklisted' );
+            $errors->add( 'wooguard_blacklist', $bl_msg );
+            $this->report_block_to_api( 'blacklist', 'phone', $email, $phone, $ip );
+            return;
+        }
+
+        error_log( 'bizgrowhub WooGuard [validation]: All checks passed' );
     }
 
     /**
