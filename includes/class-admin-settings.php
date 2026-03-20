@@ -111,8 +111,13 @@ class Admin_Settings {
                 <div class="mp-card-header">🔑 Activate Your Site</div>
                 <p style="font-size: 13px; color: var(--mp-text-muted); margin: 0 0 16px 0;">
                     Enter your license key to connect this WordPress site to your BizGrowHub dashboard.
-                    <br>Generate from <a href="https://bizgrowhub.shop/api-keys" target="_blank">bizgrowhub.shop &rarr; License Keys</a>.
+                    <br>Generate from <a href="https://bizgrowhub.shop/settings" target="_blank" style="color: var(--mp-accent);">bizgrowhub.shop &rarr; Settings &rarr; Integrations &rarr; License Keys</a>.
                 </p>
+                <div style="margin-bottom: 16px;">
+                    <a href="https://bizgrowhub.shop/settings" target="_blank" class="mp-btn mp-btn-secondary" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;">
+                        &#x1F4CA; Open Dashboard to get your key &rarr;
+                    </a>
+                </div>
                 <div class="mp-key-group">
                     <input type="text" id="license_key" name="license_key"
                            class="mp-key-input"
