@@ -202,3 +202,34 @@
 
 /* ── WP admin menu override ── */
 #adminmenu .wp-menu-image img { opacity: 1; }
+
+/* -- WhatsApp Support Card -- */
+.mp-support-card {
+    display: flex; align-items: center; gap: 14px;
+    background: rgba(37,211,102,0.06);
+    border: 1px solid rgba(37,211,102,0.18);
+    border-radius: var(--mp-radius);
+    padding: 16px 20px; margin-top: 20px;
+}
+.mp-support-icon {
+    width: 42px; height: 42px; border-radius: 10px;
+    background: rgba(37,211,102,0.1);
+    display: flex; align-items: center; justify-content: center; shrink-flex: 0;
+}
+.mp-support-text {
+    flex: 1; display: flex; flex-direction: column; gap: 2px;
+}
+.mp-support-title {
+    font-size: 13px; font-weight: 600; color: var(--mp-text);
+}
+.mp-support-sub {
+    font-size: 12px; color: var(--mp-text-muted);
+}
+.mp-btn-wa {
+    background: #25D366; color: #fff !important;
+    padding: 9px 16px; border-radius: 8px;
+    font-size: 12px; font-weight: 600;
+    text-decoration: none; white-space: nowrap;
+    transition: background 0.2s;
+}
+.mp-btn-wa:hover { background: #1ebe5d; }
