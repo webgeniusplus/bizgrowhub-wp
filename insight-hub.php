@@ -76,6 +76,7 @@ require_once BIZGROWHUB_PLUGIN_DIR . 'includes/class-data-sync.php';
 require_once BIZGROWHUB_PLUGIN_DIR . 'includes/class-order-sync.php';
 require_once BIZGROWHUB_PLUGIN_DIR . 'includes/class-incomplete-checkout.php';
 require_once BIZGROWHUB_PLUGIN_DIR . 'includes/class-image-optimizer.php';
+require_once BIZGROWHUB_PLUGIN_DIR . 'includes/class-audit-data.php';
 
 // Bootstrap the plugin
 class BizGrowHub_Plugin {
@@ -104,6 +105,7 @@ class BizGrowHub_Plugin {
         new \BizGrowHub\Order_Sync();
         new \BizGrowHub\Incomplete_Checkout();
         new \BizGrowHub\Image_Optimizer();
+        new \BizGrowHub\Audit_Data();
 
         // Hook for activation
         register_activation_hook( __FILE__, array( __CLASS__, 'activate' ) );
