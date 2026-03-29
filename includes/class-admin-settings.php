@@ -200,6 +200,27 @@ class Admin_Settings {
                         </span>
                     </div>
                 </div>
+
+                <div class="mp-card">
+                    <div class="mp-card-header">🚀 PageSpeed Insights API</div>
+                    <p style="font-size: 13px; color: var(--mp-text-muted); margin: 0 0 16px 0;">
+                        Google PageSpeed Insights API key for site performance audits.
+                        <br>Get your free API key from <a href="https://developers.google.com/speed/docs/insights/v5/get-started" target="_blank" style="color: var(--mp-accent);">Google Cloud Console</a>.
+                    </p>
+                    <form method="post" id="pagespeed-settings-form">
+                        <?php wp_nonce_field( 'BIZGROWHUB_pagespeed_settings', '_wpnonce_pagespeed' ); ?>
+                        <div style="margin-bottom: 16px;">
+                            <input type="text" 
+                                   name="pagespeed_api_key" 
+                                   id="pagespeed_api_key"
+                                   class="mp-key-input"
+                                   placeholder="AIzaSyBv8iEJbytxn2gj7qIsxGAPOen8T2sCF8"
+                                   value="<?php echo esc_attr( get_option( 'bizgrowhub_pagespeed_api_key', '' ) ); ?>" 
+                                   style="width: 100%; max-width: 500px;" />
+                        </div>
+                        <button type="submit" name="save_pagespeed" class="mp-btn mp-btn-primary">Save API Key</button>
+                    </form>
+                </div>
             </div>
 
             <!-- Features & GA4 managed from BizGrowHub dashboard -->
@@ -354,6 +375,24 @@ class Admin_Settings {
      * Handle form submission
      */
     public function handle_form() {
+        // Handle PageSpeed API key form
+        if ( isset( $_POST['save_pagespeed'] ) && isset( $_POST['_wpnonce_pagespeed'] ) ) {
+            if ( ! wp_verify_nonce( wp_unslash( $_POST['_wpnonce_pagespeed'] ), 'BIZGROWHUB_pagespeed_settings' ) ) {
+                wp_die( __( 'Security check failed.', 'bizgrowhub' ) );
+            }
+
+            if ( ! current_user_can( BIZGROWHUB_CAPABILITY_MANAGE ) ) {
+                wp_die( __( 'You do not have permission to do this.', 'bizgrowhub' ) );
+            }
+
+            $api_key = isset( $_POST['pagespeed_api_key'] ) ? sanitize_text_field( wp_unslash( $_POST['pagespeed_api_key'] ) ) : '';
+            update_option( 'bizgrowhub_pagespeed_api_key', $api_key );
+
+            wp_redirect( admin_url( 'admin.php?page=bizgrowhub&saved=1' ) );
+            exit;
+        }
+
+        // Handle license forms
         if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['_wpnonce'] ), 'BIZGROWHUB_settings' ) ) {
             wp_die( __( 'Security check failed.', 'bizgrowhub' ) );
         }

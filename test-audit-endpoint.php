@@ -41,15 +41,18 @@ if ( empty( $license_key ) ) {
     exit;
 }
 
-// Make REST API request
+// Make REST API request (POST method)
 $url = rest_url( 'bizgrowhub/v1/audit-data' );
 $args = array(
+    'method' => 'POST',
     'headers' => array(
         'X-License-Key' => $license_key,
+        'Content-Type' => 'application/json',
     ),
+    'body' => wp_json_encode( array() ),
 );
 
-$response = wp_remote_get( $url, $args );
+$response = wp_remote_post( $url, $args );
 
 ?>
 <!DOCTYPE html>
